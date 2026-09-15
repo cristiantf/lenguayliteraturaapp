@@ -1,0 +1,23 @@
+# Entornos y dependencias
+node_modules/
+vendor/
+
+# Archivos de sistema y editores
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Archivos de carga dinámica de usuarios
+uploads/activities/*
+!uploads/activities/.gitkeep
+
+# Logs y temporales
+*.log
+scratch/
+implementation_55plan.md
+implementation_plan.md
+
+# Archivos pesados > 100MB
+*.pdf
+"LENGUA Y LITERATURA 9.pdf"

@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calificar Entregas | Panel Docente</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/views/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- ── Sidebar ──────────────────────────────────────── -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../../index.html" class="logo">
+                    <div class="logo-icon">📖</div>
+                    <div class="logo-text">Lengua<span>9ºEGB</span></div>
+                </a>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar-letter">D</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-display-name">Docente</div>
+                    <div class="user-role" id="user-display-role">Docente</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Principal</div>
+                <a href="index.html">
+                    <span class="nav-icon">🏠</span> Panel de Control
+                </a>
+                <a href="actividades.html">
+                    <span class="nav-icon">📋</span> Mis Actividades
+                </a>
+                <a href="calificar.html" class="active">
+                    <span class="nav-icon">⭐</span> Calificar Entregas
+                </a>
+
+                <div class="nav-section-title">Plataforma</div>
+                <a href="../../index.html" target="_blank">
+                    <span class="nav-icon">🌐</span> Ver Portal Público
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="btn-logout">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- ── Contenido Principal ──────────────────────────── -->
+        <main class="dashboard-main">
+            <div class="dashboard-topbar">
+                <div>
+                    <h1>⭐ Calificar Entregas de Estudiantes</h1>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">Revisa el trabajo enviado por los estudiantes y asigna su calificación</p>
+                </div>
+                <div class="topbar-actions">
+                    <!-- Notificaciones -->
+                    <div class="notif-dropdown">
+                        <button class="notif-trigger" id="notif-btn" aria-label="Notificaciones">
+                            🔔
+                            <span class="notif-count" id="notif-count" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-header">
+                                <h4>Notificaciones</h4>
+                                <button class="btn btn-sm" id="notif-mark-all" style="font-size:0.75rem; background:none; border:none; color:var(--primary); cursor:pointer;">Marcar todas</button>
+                            </div>
+                            <div id="notif-list">
+                                <div style="padding:2rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">Sin notificaciones</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon theme-toggle" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+                </div>
+            </div>
+
+            <!-- Tabla de Entregas -->
+            <div class="card" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--surface); overflow:hidden;">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" style="color:var(--text-color);">
+                        <thead style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.5px;">
+                            <tr>
+                                <th style="padding:1rem;">ID</th>
+                                <th>Estudiante</th>
+                                <th>Actividad</th>
+                                <th>Fecha de Entrega</th>
+                                <th>Calificación</th>
+                                <th>Respuesta</th>
+                                <th style="text-align:right; padding-right:1.5rem;">Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="submissions-table-body">
+                            <tr>
+                                <td colspan="7" style="text-align:center; padding:2rem; color:var(--text-muted);">Cargando entregas...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal Calificar Entrega -->
+    <div class="modal fade" id="gradeModal" tabindex="-1" aria-labelledby="gradeModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background:var(--surface); color:var(--text-color); border:1px solid var(--border-color); border-radius:var(--radius-lg);">
+                <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                    <h5 class="modal-title" id="gradeModalLabel">Asignar Calificación</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="grade-form">
+                    <input type="hidden" id="grade-sub-id">
+                    <div class="modal-body">
+                        <div class="mb-3" style="background:var(--bg-secondary); padding:0.75rem 1rem; border-radius:var(--radius-md);">
+                            <div style="font-size:0.85rem; color:var(--text-muted);">Estudiante:</div>
+                            <strong id="grade-student-name" style="color:var(--text-color);">—</strong>
+                            <div style="font-size:0.85rem; color:var(--text-muted); margin-top:0.35rem;">Actividad:</div>
+                            <strong id="grade-act-title" style="color:var(--text-color);">—</strong>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="grade-nota" style="font-size:0.85rem; font-weight:600;">
+                                Nota Obtenida (Máximo <span id="grade-max-note">10.00</span> pts) *
+                            </label>
+                            <input type="number" step="0.01" min="0" class="form-control" id="grade-nota" required placeholder="Ej. 9.50" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="grade-feedback" style="font-size:0.85rem; font-weight:600;">
+                                Retroalimentación / Observaciones
+                            </label>
+                            <textarea class="form-control" id="grade-feedback" rows="3" placeholder="Excelente análisis de los personajes..." style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar Nota y Notificar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Ver Respuesta del Estudiante -->
+    <div class="modal fade" id="viewSubmissionModal" tabindex="-1" aria-labelledby="viewSubmissionModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background:var(--surface); color:var(--text-color); border:1px solid var(--border-color); border-radius:var(--radius-lg); box-shadow:0 20px 40px rgba(0,0,0,0.18);">
+                <div class="modal-header" style="border-bottom:1px solid var(--border-color); padding:1.25rem 1.5rem;">
+                    <div>
+                        <h5 class="modal-title" id="viewSubmissionModalLabel" style="display:flex; align-items:center; gap:0.5rem; font-weight:700; margin:0;">
+                            <span>📄</span> Detalle de Entrega del Estudiante
+                        </h5>
+                        <small id="view-sub-meta" style="color:var(--text-muted); font-size:0.8rem;"></small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" style="padding:1.5rem;">
+                    <!-- Cabecera de la Entrega -->
+                    <div style="background:var(--bg-secondary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.15rem 1.25rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
+                        <div style="display:flex; align-items:center; gap:0.9rem;">
+                            <div id="view-sub-avatar" style="width:48px; height:48px; border-radius:50%; background:var(--primary); color:#fff; display:flex; align-items:center; justify-content:center; font-size:1.25rem; font-weight:700; box-shadow:0 4px 10px rgba(99,102,241,0.3);">
+                                C
+                            </div>
+                            <div>
+                                <h6 id="view-sub-student-name" style="margin:0; font-weight:700; color:var(--text-color); font-size:1.05rem;">Estudiante</h6>
+                                <div id="view-sub-student-email" style="font-size:0.82rem; color:var(--text-muted); margin-top:0.15rem;">email@sanlorenzo.edu.ec</div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div id="view-sub-status-badge"></div>
+                            <small id="view-sub-date" style="display:block; color:var(--text-muted); font-size:0.75rem; margin-top:0.35rem; font-weight:500;"></small>
+                        </div>
+                    </div>
+
+                    <!-- Actividad Info -->
+                    <div style="margin-bottom:1.25rem; padding:0.85rem 1.1rem; background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-md);">
+                        <span style="font-size:0.72rem; text-transform:uppercase; letter-spacing:0.05em; font-weight:700; color:var(--text-muted); display:block;">Actividad Correspondiente</span>
+                        <h5 id="view-sub-act-title" style="margin:0.25rem 0 0; font-size:1.05rem; font-weight:700; color:var(--primary);">Título de la Actividad</h5>
+                    </div>
+
+                    <!-- Contenido / Respuesta -->
+                    <div style="margin-bottom:1.25rem;">
+                        <span style="font-size:0.88rem; font-weight:700; color:var(--text-color); display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                            <span>✍️</span> Respuesta y Contenido Enviado
+                        </span>
+                        <div id="view-sub-content" style="background:var(--bg-primary); border:1px solid var(--border-color); border-radius:var(--radius-md); padding:1.25rem; font-size:0.92rem; line-height:1.65; white-space:pre-wrap; word-break:break-word; max-height:260px; overflow-y:auto; color:var(--text-color);">
+                            Contenido...
+                        </div>
+                    </div>
+
+                    <!-- Archivo adjunto si existe -->
+                    <div id="view-sub-file-container" style="display:none; margin-bottom:1.25rem;">
+                        <span style="font-size:0.88rem; font-weight:700; color:var(--text-color); display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                            <span>📎</span> Archivo Adjunto de la Entrega
+                        </span>
+                        <div style="background:var(--bg-secondary); border:1px dashed var(--border-color); border-radius:var(--radius-md); padding:0.85rem 1.25rem; display:flex; align-items:center; justify-content:space-between; gap:1rem;">
+                            <div style="display:flex; align-items:center; gap:0.65rem; overflow:hidden;">
+                                <span style="font-size:1.6rem;">📄</span>
+                                <span id="view-sub-filename" style="font-size:0.88rem; font-weight:600; text-overflow:ellipsis; overflow:hidden; white-space:nowrap;">archivo.pdf</span>
+                            </div>
+                            <a href="#" id="view-sub-filelink" target="_blank" class="btn btn-sm btn-outline-primary" style="white-space:nowrap; font-weight:600;">
+                                📥 Abrir / Descargar
+                            </a>
+                        </div>
+                    </div>
+
+                    <!-- Retroalimentación actual si ya fue calificado -->
+                    <div id="view-sub-feedback-container" style="display:none;">
+                        <span style="font-size:0.88rem; font-weight:700; color:var(--text-color); display:flex; align-items:center; gap:0.4rem; margin-bottom:0.5rem;">
+                            <span>💬</span> Evaluación Registrada por el Docente
+                        </span>
+                        <div style="background:rgba(16, 185, 129, 0.08); border:1px solid rgba(16, 185, 129, 0.25); border-radius:var(--radius-md); padding:1rem 1.25rem;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:0.4rem; flex-wrap:wrap; gap:0.5rem;">
+                                <strong id="view-sub-feedback-grade" style="color:#10b981; font-size:1.02rem;">⭐ 10.00 / 10 pts</strong>
+                                <small id="view-sub-feedback-date" style="color:var(--text-muted); font-size:0.75rem; font-weight:500;"></small>
+                            </div>
+                            <div id="view-sub-feedback-text" style="font-size:0.88rem; color:var(--text-color); font-style:italic; line-height:1.55;"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid var(--border-color); padding:1rem 1.5rem; display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <button type="button" class="btn btn-primary" id="view-sub-action-btn">
+                        ⭐ Asignar Calificación
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="../../js/modules/toast.js"></script>
+    <script src="../../js/modules/theme.js"></script>
+    <script src="../../js/modules/auth.js"></script>
+    <script src="../../js/modules/notifications.js"></script>
+    <script src="../../js/modules/activitiesManager.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            Theme.init();
+            const user = await Auth.requireRole('docente');
+            if (user) {
+                document.getElementById('user-display-name').textContent = `${user.nombre} ${user.apellido}`;
+                document.getElementById('user-avatar-letter').textContent = (user.nombre || 'D').charAt(0).toUpperCase();
+                Notifications.init();
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const actId = urlParams.get('actividad_id');
+                ActivitiesManager.loadSubmissionsForGrading(actId);
+                ActivitiesManager.bindEvents();
+
+                document.getElementById('btn-logout').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    Auth.logout();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

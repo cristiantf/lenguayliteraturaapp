@@ -1,26 +1,116 @@
 /**
  * Lengua y Literatura 9no EGB - Motor de Evaluación y Diagnóstico
  * Unidad Educativa Fiscomisional San Lorenzo
+ * 
+ * Dinámicamente carga y evalúa las preguntas desde quizData.js
  */
 
+let currentQuestions = [];
+
+function renderQuiz(unitFilter = 'all') {
+    const container = document.getElementById('quiz-questions-container');
+    if (!container || typeof QUIZ_QUESTIONS === 'undefined') return;
+
+    // Filter questions
+    if (unitFilter === 'all') {
+        currentQuestions = [...QUIZ_QUESTIONS];
+    } else {
+        const unit = parseInt(unitFilter);
+        currentQuestions = QUIZ_QUESTIONS.filter(q => q.unit === unit);
+    }
+
+    // Render HTML
+    let html = '';
+    currentQuestions.forEach((q, index) => {
+        let optionsHtml = '';
+        q.options.forEach((opt, optIndex) => {
+            optionsHtml += `
+                <label class="quiz-option-label">
+                    <input type="radio" name="q${q.id}" value="${optIndex}">
+                    <span>${opt}</span>
+                </label>
+            `;
+        });
+
+        html += `
+            <div class="quiz-question-block" data-question-id="${q.id}">
+                <div class="quiz-question-header">
+                    <span class="badge badge-primary">Pregunta ${index + 1}</span>
+                    <span class="badge badge-emerald">Unidad ${q.unit} - ${q.topic}</span>
+                </div>
+                <h2 class="quiz-question-title">
+                    ${index + 1}. ${q.question}
+                </h2>
+                ${optionsHtml}
+                <div class="quiz-feedback-box" id="feedback-q${q.id}" style="display:none; margin-top:1rem; padding:1rem; border-radius:8px; background:#f8fafc; border:1px solid #e2e8f0; font-size:0.9rem;">
+                    <!-- Feedback injected here -->
+                </div>
+            </div>
+        `;
+    });
+
+    container.innerHTML = html;
+}
+
 function initAutoevaluacion() {
+    // Escuchar el selector de unidad
+    const unitSelector = document.getElementById('unit-selector');
+    if (unitSelector) {
+        unitSelector.addEventListener('change', (e) => {
+            renderQuiz(e.target.value);
+            const form = document.getElementById('autoevaluacion-form');
+            if (form) form.reset();
+            if (typeof closeFloatingToast === 'function') closeFloatingToast();
+        });
+    }
+
+    // Render inicial
+    renderQuiz('all');
+
     const btnCalcular = document.getElementById('btn-calcular-calificacion');
     if (!btnCalcular) return;
 
     btnCalcular.addEventListener('click', () => {
-        const q1 = document.querySelector('input[name="q1"]:checked');
-        const q2 = document.querySelector('input[name="q2"]:checked');
-        const q3 = document.querySelector('input[name="q3"]:checked');
+        if (currentQuestions.length === 0) return;
 
-        // Validar que se hayan respondido las 3 preguntas
-        if (!q1 || !q2 || !q3) {
+        let answeredCount = 0;
+        let correctCount = 0;
+
+        currentQuestions.forEach((q) => {
+            const selectedOpt = document.querySelector(`input[name="q${q.id}"]:checked`);
+            const feedbackBox = document.getElementById(`feedback-q${q.id}`);
+            
+            if (selectedOpt) {
+                answeredCount++;
+                const selectedValue = parseInt(selectedOpt.value);
+                const isCorrect = selectedValue === q.answer;
+                
+                if (isCorrect) correctCount++;
+
+                // Mostrar retroalimentación individual
+                if (feedbackBox) {
+                    feedbackBox.style.display = 'block';
+                    feedbackBox.style.borderColor = isCorrect ? '#10b981' : '#e11d48';
+                    feedbackBox.style.backgroundColor = isCorrect ? '#ecfdf5' : '#fff1f2';
+                    feedbackBox.innerHTML = `
+                        <strong style="color: ${isCorrect ? '#047857' : '#be123c'}">${isCorrect ? '✅ Correcto' : '❌ Incorrecto'}</strong><br>
+                        <span style="color: var(--text-main); margin-top: 0.5rem; display: block;">${q.explanation}</span>
+                    `;
+                }
+            } else {
+                if (feedbackBox) feedbackBox.style.display = 'none';
+            }
+        });
+
+        // Validar que se hayan respondido todas
+        if (answeredCount < currentQuestions.length) {
             const toastError = `
                 <div style="display:flex; align-items:center; justify-content:space-between; gap:1rem;">
                     <div style="display:flex; align-items:center; gap:0.75rem;">
                         <span style="font-size:1.6rem;">⚠️</span>
                         <div>
                             <strong style="color:var(--accent-rose); display:block; font-size:0.95rem;">Preguntas Incompletas</strong>
-                            <span style="font-size:0.85rem; color:var(--text-muted);">Por favor responde las 3 preguntas antes de calcular tu calificación.</span>
+                            <span style="font-size:0.85rem; color:var(--text-muted);">Has respondido ${answeredCount} de ${currentQuestions.length} preguntas. Responde todas para calificar.</span>
                         </div>
                     </div>
                     <button type="button" class="btn-close" onclick="closeFloatingToast()" aria-label="Cerrar"></button>
@@ -32,29 +122,24 @@ function initAutoevaluacion() {
             return;
         }
 
-        // Calcular respuestas correctas (valores: "1" = correcta, "0" = incorrecta)
-        const val1 = parseInt(q1.value);
-        const val2 = parseInt(q2.value);
-        const val3 = parseInt(q3.value);
-
-        const correctCount = val1 + val2 + val3;
-        const totalScore = ((correctCount / 3) * 10).toFixed(1); // Calificación sobre 10.0
+        const totalScore = ((correctCount / currentQuestions.length) * 10).toFixed(1); // Calificación sobre 10.0
+        const percentage = (correctCount / currentQuestions.length) * 100;
 
         let badgeColor = 'badge-emerald';
         let icon = '🎉';
         let titleMessage = '¡Excelente Trabajo!';
-        let descMessage = 'Has demostrado un dominio sobresaliente en La Novela Policial, la Ortografía de la G/J y El Texto Expositivo.';
+        let descMessage = `Has demostrado un gran dominio en estos temas.`;
 
-        if (correctCount === 2) {
+        if (percentage >= 70 && percentage < 90) {
             badgeColor = 'badge-primary';
             icon = '👍';
             titleMessage = '¡Buen Resultado!';
-            descMessage = 'Obtuviste 2 de 3 respuestas correctas (6.7/10). Te recomendamos revisar las lecciones para perfeccionar el tema fallido.';
-        } else if (correctCount <= 1) {
+            descMessage = `Te recomendamos revisar las preguntas falladas para perfeccionar.`;
+        } else if (percentage < 70) {
             badgeColor = 'badge-amber';
             icon = '📚';
             titleMessage = '¡Sigue Practicando!';
-            descMessage = 'Te sugerimos repasar los módulos y lecciones interactivas para reforzar tus conocimientos de 9no EGB.';
+            descMessage = `Te sugerimos repasar el material de estudio para reforzar tus conocimientos.`;
         }
 
         // Crear el mensaje flotante de retroalimentación
@@ -69,17 +154,15 @@ function initAutoevaluacion() {
                 </div>
                 <button type="button" class="btn-close" onclick="closeFloatingToast()" aria-label="Cerrar"></button>
             </div>
-            <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0.75rem; line-height:1.4;">${descMessage}</p>
-            <div style="font-size:0.825rem; background:var(--bg-body); padding:0.65rem 0.85rem; border-radius:var(--radius-sm); border:1px solid var(--border-color); display:flex; flex-direction:column; gap:0.25rem;">
-                <div><strong>1. Novela Policial:</strong> ${val1 === 1 ? '<span style="color:#10b981;">✅ Correcto</span>' : '<span style="color:#e11d48;">❌ Incorrecto (Esclarecimiento de enigma con pistas)</span>'}</div>
-                <div><strong>2. Uso de G / J:</strong> ${val2 === 1 ? '<span style="color:#10b981;">✅ Correcto</span>' : '<span style="color:#e11d48;">❌ Incorrecto (Geografía, viaje, recoger, dijeron)</span>'}</div>
-                <div><strong>3. Texto Expositivo:</strong> ${val3 === 1 ? '<span style="color:#10b981;">✅ Correcto</span>' : '<span style="color:#e11d48;">❌ Incorrecto (Información clara y objetiva)</span>'}</div>
-            </div>
+            <p style="font-size:0.875rem; color:var(--text-muted); margin-bottom:0;">${descMessage}</p>
         `;
 
         if (typeof showFloatingToast === 'function') {
             showFloatingToast(toastHTML);
         }
+        
+        // Scroll to top of quiz to see feedback
+        window.scrollTo({ top: document.querySelector('.quiz-section').offsetTop - 50, behavior: 'smooth' });
     });
 
     // Soporte para reiniciar cuestionario
@@ -88,7 +171,14 @@ function initAutoevaluacion() {
         btnReiniciar.addEventListener('click', () => {
             const form = document.getElementById('autoevaluacion-form');
             if (form) form.reset();
+            
+            // Ocultar feedback boxes
+            document.querySelectorAll('.quiz-feedback-box').forEach(box => {
+                box.style.display = 'none';
+            });
+            
             if (typeof closeFloatingToast === 'function') closeFloatingToast();
+            window.scrollTo({ top: document.querySelector('.quiz-section').offsetTop - 50, behavior: 'smooth' });
         });
     }
 }

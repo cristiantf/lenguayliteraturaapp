@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Estudiante | Lengua y Literatura 9º EGB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/views/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- Sidebar -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../../index.html" class="logo">
+                    <div class="logo-icon">📖</div>
+                    <div class="logo-text">Lengua<span>9ºEGB</span></div>
+                </a>
+            </div>
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar-letter">E</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-display-name">Estudiante</div>
+                    <div class="user-role" id="user-display-role">Estudiante</div>
+                </div>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Principal</div>
+                <a href="index.html" class="active"><span class="nav-icon">🏠</span> Mi Panel</a>
+                <a href="actividades.html"><span class="nav-icon">📋</span> Actividades</a>
+                <a href="calificaciones.html"><span class="nav-icon">⭐</span> Mis Calificaciones</a>
+                
+                <div class="nav-section-title">Contenido</div>
+                <a href="../../views/modulos.html" target="_blank"><span class="nav-icon">📚</span> Módulos de Estudio</a>
+                <a href="../../views/figuras.html" target="_blank"><span class="nav-icon">🎴</span> Figuras Literarias</a>
+                <a href="../../views/cuestionario.html" target="_blank"><span class="nav-icon">❓</span> Cuestionario</a>
+                <a href="../../views/lecciones.html" target="_blank"><span class="nav-icon">📝</span> Lecciones</a>
+                
+                <div class="nav-section-title">Notificaciones</div>
+                <a href="#" id="nav-notificaciones">
+                    <span class="nav-icon">🔔</span> Notificaciones
+                    <span class="nav-badge" id="sidebar-notif-count" style="display:none;">0</span>
+                </a>
+            </nav>
+            <div class="sidebar-footer">
+                <a href="#" id="btn-logout"><span>🚪</span> Cerrar Sesión</a>
+            </div>
+        </aside>
+
+        <!-- Contenido -->
+        <main class="dashboard-main">
+            <div class="dashboard-topbar">
+                <h1>👨‍🎓 Mi Panel de Estudiante</h1>
+                <div class="topbar-actions">
+                    <div class="notif-dropdown">
+                        <button class="notif-trigger" id="notif-btn" aria-label="Notificaciones">🔔
+                            <span class="notif-count" id="notif-count" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-header">
+                                <h4>Notificaciones</h4>
+                                <button id="notif-mark-all" style="font-size:0.75rem;background:none;border:none;color:var(--primary);cursor:pointer;">Marcar todas</button>
+                            </div>
+                            <div id="notif-list"><div style="padding:2rem;text-align:center;color:var(--text-muted);">Sin notificaciones</div></div>
+                        </div>
+                    </div>
+                    <button class="theme-toggle" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">📋</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-actividades">—</div>
+                        <div class="stat-label">Actividades Asignadas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-amber">⏳</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-pendientes">—</div>
+                        <div class="stat-label">Pendientes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-emerald">✅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-entregadas">—</div>
+                        <div class="stat-label">Entregadas</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-rose">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-promedio">—</div>
+                        <div class="stat-label">Promedio General</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funcionalidades y Módulos del Panel de Estudiante -->
+            <div style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-color, #1e293b); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>⚡</span> Funcionalidades del Estudiante
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Espacio de aprendizaje, tareas y recursos didácticos</span>
+            </div>
+
+            <div class="modules-grid">
+                <!-- Tarjeta 1: Actividades Asignadas -->
+                <a href="actividades.html" class="module-card">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-primary-subtle">📋</div>
+                        <span class="badge badge-primary" style="font-size: 0.75rem;">Tareas y Entregas</span>
+                    </div>
+                    <h4 class="module-title">Actividades Asignadas</h4>
+                    <p class="module-desc">Consulta tus tareas activas, verifica las fechas límites de entrega y sube tus respuestas o archivos.</p>
+                    <ul class="module-features">
+                        <li><span>⏳</span> Tareas pendientes y fechas de cierre</li>
+                        <li><span>📤</span> Envío de respuestas y archivos adjuntos</li>
+                        <li><span>✅</span> Confirmación inmediata de entrega</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-acts">📋 Cargando tareas...</span>
+                        <span class="module-link-btn">Ver actividades ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 2: Mis Calificaciones -->
+                <a href="calificaciones.html" class="module-card">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-rose-subtle">⭐</div>
+                        <span class="badge badge-success" style="font-size: 0.75rem;">Rendimiento</span>
+                    </div>
+                    <h4 class="module-title">Mis Calificaciones</h4>
+                    <p class="module-desc">Revisa tus notas obtenidas en cada actividad, comentarios de los docentes y tu promedio general.</p>
+                    <ul class="module-features">
+                        <li><span>📊</span> Boletín completo de calificaciones</li>
+                        <li><span>💬</span> Retroalimentación y notas del docente</li>
+                        <li><span>🏆</span> Monitoreo del promedio general</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-promedio">⭐ Cargando promedio...</span>
+                        <span class="module-link-btn">Boletín de notas ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 3: Módulos de Estudio -->
+                <a href="../../views/modulos.html" class="module-card" target="_blank">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-emerald-subtle">📚</div>
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; font-size: 0.75rem;">Contenidos</span>
+                    </div>
+                    <h4 class="module-title">Módulos de Estudio</h4>
+                    <p class="module-desc">Contenidos didácticos de las 4 unidades curriculares de Lengua y Literatura 9.º Año EGB Superior.</p>
+                    <ul class="module-features">
+                        <li><span>📖</span> Textos, lecturas críticas y teoría</li>
+                        <li><span>💡</span> Orígenes de la escritura y literatura</li>
+                        <li><span>✍️</span> Guías de redacción y comprensión</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat">📘 4 Unidades didácticas</span>
+                        <span class="module-link-btn">Estudiar módulos ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 4: Figuras Literarias -->
+                <a href="../../views/figuras.html" class="module-card" target="_blank">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-cyan-subtle">🎴</div>
+                        <span class="badge" style="background: rgba(6, 182, 212, 0.15); color: #0891b2; font-size: 0.75rem;">Didáctico</span>
+                    </div>
+                    <h4 class="module-title">Figuras Literarias</h4>
+                    <p class="module-desc">Aprende y practica figuras retóricas con tarjetas interactivas giratorias, definiciones y ejemplos.</p>
+                    <ul class="module-features">
+                        <li><span>🎭</span> Metáforas, hipérboles, anáforas y más</li>
+                        <li><span>🔄</span> Fichas didácticas interactivas con giro 3D</li>
+                        <li><span>📝</span> Ejemplos literarios memorables</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat">🎴 Tarjetas interactivas</span>
+                        <span class="module-link-btn">Aprender figuras ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 5: Cuestionario y Quizzes -->
+                <a href="../../views/cuestionario.html" class="module-card" target="_blank">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-amber-subtle">❓</div>
+                        <span class="badge badge-warning" style="font-size: 0.75rem;">Autoevaluación</span>
+                    </div>
+                    <h4 class="module-title">Cuestionario y Práctica</h4>
+                    <p class="module-desc">Prueba tus conocimientos con simuladores interactivos de preguntas con retroalimentación inmediata.</p>
+                    <ul class="module-features">
+                        <li><span>🧠</span> Banco dinámico de preguntas tipo examen</li>
+                        <li><span>⏱️</span> Práctica formativa a tu propio ritmo</li>
+                        <li><span>🎯</span> Comprobación instantánea de aciertos</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat">✨ Autoevaluación interactiva</span>
+                        <span class="module-link-btn">Iniciar cuestionario ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 6: Centro de Notificaciones -->
+                <a href="#" class="module-card" id="card-notif-trigger">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-purple-subtle">🔔</div>
+                        <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #9333ea; font-size: 0.75rem;">Avisos</span>
+                    </div>
+                    <h4 class="module-title">Centro de Avisos</h4>
+                    <p class="module-desc">Recibe avisos inmediatos cuando los docentes publiquen actividades, califiquen tareas o emitan comunicados.</p>
+                    <ul class="module-features">
+                        <li><span>🔔</span> Alertas de nuevas tareas asignadas</li>
+                        <li><span>⭐</span> Aviso instantáneo de notas publicadas</li>
+                        <li><span>📢</span> Comunicados institucionales globales</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-notifs">🔔 Cargando avisos...</span>
+                        <span class="module-link-btn">Ver notificaciones ➔</span>
+                    </div>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <script src="../../js/modules/auth.js"></script>
+    <script src="../../js/modules/theme.js"></script>
+    <script src="../../js/modules/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const user = await Auth.guard('estudiante');
+            if (!user) return;
+            Auth.renderUserInfo(user);
+            if (typeof initThemeToggle === 'function') initThemeToggle();
+            if (typeof Notifications !== 'undefined') Notifications.init();
+
+            const notifBtn = document.getElementById('notif-btn');
+            const notifPanel = document.getElementById('notif-panel');
+            if (notifBtn && notifPanel) {
+                notifBtn.addEventListener('click', () => notifPanel.classList.toggle('open'));
+                document.addEventListener('click', (e) => { 
+                    if (!e.target.closest('.notif-dropdown') && !e.target.closest('#card-notif-trigger') && !e.target.closest('#nav-notificaciones')) {
+                        notifPanel.classList.remove('open'); 
+                    }
+                });
+            }
+
+            const cardNotifTrigger = document.getElementById('card-notif-trigger');
+            if (cardNotifTrigger && notifPanel) {
+                cardNotifTrigger.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    notifPanel.classList.toggle('open');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            const navNotif = document.getElementById('nav-notificaciones');
+            if (navNotif && notifPanel) {
+                navNotif.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    notifPanel.classList.toggle('open');
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+            }
+
+            loadStudentData();
+        });
+
+        async function loadStudentData() {
+            // Cargar actividades
+            try {
+                const res = await fetch('/api/activities/list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    const acts = data.activities;
+                    const pendientes = acts.filter(a => !a.mi_estado);
+                    const entregadas = acts.filter(a => a.mi_estado === 'entregada' || a.mi_estado === 'calificada');
+
+                    document.getElementById('stat-actividades').textContent = acts.length;
+                    document.getElementById('stat-pendientes').textContent = pendientes.length;
+                    document.getElementById('stat-entregadas').textContent = entregadas.length;
+
+                    const cardActs = document.getElementById('card-stat-acts');
+                    if (cardActs) {
+                        cardActs.textContent = pendientes.length > 0
+                            ? `⏳ ${pendientes.length} tareas pendientes`
+                            : `🎉 ¡Sin tareas pendientes!`;
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            // Cargar calificaciones
+            try {
+                const res = await fetch('/api/grades/student.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    const promStr = data.promedio !== null ? `${data.promedio}/10` : 'N/A';
+                    document.getElementById('stat-promedio').textContent = promStr;
+
+                    const cardProm = document.getElementById('card-stat-promedio');
+                    if (cardProm) {
+                        cardProm.textContent = data.promedio !== null 
+                            ? `⭐ Promedio: ${data.promedio}/10` 
+                            : '⭐ Sin notas registradas';
+                    }
+                }
+            } catch (e) { console.error(e); }
+
+            // Cargar notificaciones count
+            try {
+                const res = await fetch('/api/notifications/list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    const cardNotifs = document.getElementById('card-stat-notifs');
+                    if (cardNotifs) cardNotifs.textContent = `🔔 ${data.notifications.length} avisos recibidos`;
+                }
+            } catch (e) {
+                const cardNotifs = document.getElementById('card-stat-notifs');
+                if (cardNotifs) cardNotifs.textContent = '🔔 Historial de avisos';
+            }
+        }
+    </script>
+</body>
+</html>

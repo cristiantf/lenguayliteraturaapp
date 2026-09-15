@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel Administrador | Lengua y Literatura 9º EGB</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/views/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- ── Sidebar ──────────────────────────────────────── -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../../index.html" class="logo">
+                    <div class="logo-icon">📖</div>
+                    <div class="logo-text">Lengua<span>9ºEGB</span></div>
+                </a>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar-letter">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-display-name">Administrador</div>
+                    <div class="user-role" id="user-display-role">Administrador</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Principal</div>
+                <a href="index.html" class="active">
+                    <span class="nav-icon">🏠</span> Panel de Control
+                </a>
+                <a href="usuarios.html">
+                    <span class="nav-icon">👥</span> Gestionar Usuarios
+                </a>
+
+                <div class="nav-section-title">Gestión Académica</div>
+                <a href="actividades.html">
+                    <span class="nav-icon">📋</span> Supervisar Actividades
+                </a>
+                <a href="notificaciones.html">
+                    <span class="nav-icon">🔔</span> Notificaciones y Avisos
+                    <span class="nav-badge" id="sidebar-notif-count" style="display:none;">0</span>
+                </a>
+
+                <div class="nav-section-title">Plataforma</div>
+                <a href="../../index.html" target="_blank">
+                    <span class="nav-icon">🌐</span> Ver Portal Público
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="btn-logout">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- ── Contenido Principal ──────────────────────────── -->
+        <main class="dashboard-main">
+            <div class="dashboard-topbar">
+                <h1>👨‍💼 Panel de Administración</h1>
+                <div class="topbar-actions">
+                    <!-- Notificaciones -->
+                    <div class="notif-dropdown">
+                        <button class="notif-trigger" id="notif-btn" aria-label="Notificaciones">
+                            🔔
+                            <span class="notif-count" id="notif-count" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-header">
+                                <h4>Notificaciones</h4>
+                                <button class="btn btn-sm" id="notif-mark-all" style="font-size:0.75rem; background:none; border:none; color:var(--primary); cursor:pointer;">Marcar todas</button>
+                            </div>
+                            <div id="notif-list">
+                                <div style="padding:2rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">Sin notificaciones</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon theme-toggle" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid" id="admin-stats">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">👥</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-total-users">—</div>
+                        <div class="stat-label">Usuarios Totales</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-emerald">👩‍🏫</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-docentes">—</div>
+                        <div class="stat-label">Docentes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-amber">👨‍🎓</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-estudiantes">—</div>
+                        <div class="stat-label">Estudiantes</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-rose">📋</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-actividades">—</div>
+                        <div class="stat-label">Actividades Creadas</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Funcionalidades y Módulos del Panel de Administración -->
+            <div style="margin-bottom: 1.25rem; display: flex; align-items: center; justify-content: space-between;">
+                <h3 style="font-size: 1.25rem; font-weight: 700; color: var(--text-color, #1e293b); display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+                    <span>⚡</span> Funcionalidades del Sistema
+                </h3>
+                <span style="font-size: 0.85rem; color: var(--text-muted); font-weight: 500;">Módulos de gestión y supervisión activa</span>
+            </div>
+
+            <div class="modules-grid">
+                <!-- Tarjeta 1: Gestión de Usuarios -->
+                <a href="usuarios.html" class="module-card">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-primary-subtle">👥</div>
+                        <span class="badge badge-primary" style="font-size: 0.75rem;">Módulo Principal</span>
+                    </div>
+                    <h4 class="module-title">Gestión de Usuarios</h4>
+                    <p class="module-desc">Control integral de cuentas, registro de docentes, alta de estudiantes y administración de permisos del sistema.</p>
+                    <ul class="module-features">
+                        <li><span>➕</span> Registrar nuevos docentes y estudiantes</li>
+                        <li><span>✏️</span> Editar datos personales y correos</li>
+                        <li><span>🔒</span> Activar, suspender o restablecer accesos</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-users">👥 Cargando usuarios...</span>
+                        <span class="module-link-btn">Acceder al módulo ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 2: Supervisar Actividades -->
+                <a href="actividades.html" class="module-card">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-emerald-subtle">📚</div>
+                        <span class="badge badge-success" style="font-size: 0.75rem;">Académico</span>
+                    </div>
+                    <h4 class="module-title">Supervisar Actividades</h4>
+                    <p class="module-desc">Monitoreo y auditoría de tareas creadas por docentes, estados de publicación y entregas de estudiantes.</p>
+                    <ul class="module-features">
+                        <li><span>🔍</span> Auditar actividades y fechas límites</li>
+                        <li><span>📊</span> Revisar entregas y notas asignadas</li>
+                        <li><span>⚡</span> Gestionar estado activo/inactivo</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-acts">📋 Cargando tareas...</span>
+                        <span class="module-link-btn">Supervisar tareas ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 3: Centro de Notificaciones y Avisos -->
+                <a href="notificaciones.html" class="module-card">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-purple-subtle">📢</div>
+                        <span class="badge" style="background: rgba(168, 85, 247, 0.15); color: #9333ea; font-size: 0.75rem;">Comunicación</span>
+                    </div>
+                    <h4 class="module-title">Centro de Notificaciones</h4>
+                    <p class="module-desc">Difusión de comunicados institucionales globales y seguimiento de avisos de entregas y calificaciones.</p>
+                    <ul class="module-features">
+                        <li><span>📣</span> Enviar comunicados a toda la comunidad</li>
+                        <li><span>🎯</span> Mensajes específicos para docentes o estudiantes</li>
+                        <li><span>🔔</span> Historial y registro de notificaciones</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat" id="card-stat-notifs">🔔 Cargando avisos...</span>
+                        <span class="module-link-btn">Gestionar avisos ➔</span>
+                    </div>
+                </a>
+
+                <!-- Tarjeta 4: Ver Portal Público -->
+                <a href="../../index.html" class="module-card" target="_blank">
+                    <div class="module-card-header">
+                        <div class="module-icon bg-amber-subtle">🌐</div>
+                        <span class="badge badge-warning" style="font-size: 0.75rem;">Plataforma</span>
+                    </div>
+                    <h4 class="module-title">Portal Educativo Público</h4>
+                    <p class="module-desc">Visualizar la experiencia del estudiante en el portal interactivo de Lengua y Literatura 9no EGB.</p>
+                    <ul class="module-features">
+                        <li><span>📖</span> Contenidos didácticos y figuras literarias</li>
+                        <li><span>💡</span> Quizzes y módulos interactivos</li>
+                        <li><span>🚀</span> Comprobación de experiencia de usuario</li>
+                    </ul>
+                    <div class="module-footer">
+                        <span class="module-stat">🌐 Vista interactiva</span>
+                        <span class="module-link-btn">Explorar portal ➔</span>
+                    </div>
+                </a>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="../../js/modules/auth.js"></script>
+    <script src="../../js/modules/theme.js"></script>
+    <script src="../../js/modules/notifications.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Proteger acceso: solo admin
+            const user = await Auth.guard('admin');
+            if (!user) return;
+            
+            Auth.renderUserInfo(user);
+            if (typeof initThemeToggle === 'function') initThemeToggle();
+            if (typeof Notifications !== 'undefined') Notifications.init();
+
+            // Cargar estadísticas y métricas de tarjetas
+            loadStats();
+
+            // Toggle notificaciones
+            const notifBtn = document.getElementById('notif-btn');
+            const notifPanel = document.getElementById('notif-panel');
+            if (notifBtn && notifPanel) {
+                notifBtn.addEventListener('click', () => notifPanel.classList.toggle('open'));
+                document.addEventListener('click', (e) => {
+                    if (!e.target.closest('.notif-dropdown')) notifPanel.classList.remove('open');
+                });
+            }
+        });
+
+        async function loadStats() {
+            try {
+                const res = await fetch('/api/users/list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    const users = data.users;
+                    document.getElementById('stat-total-users').textContent = users.length;
+                    document.getElementById('stat-docentes').textContent = users.filter(u => u.rol === 'docente').length;
+                    document.getElementById('stat-estudiantes').textContent = users.filter(u => u.rol === 'estudiante').length;
+                    
+                    const cardUsers = document.getElementById('card-stat-users');
+                    if (cardUsers) cardUsers.textContent = `👥 ${users.length} usuarios registrados`;
+                }
+            } catch (e) { console.error('Stats error:', e); }
+
+            try {
+                const res = await fetch('/api/activities/list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    document.getElementById('stat-actividades').textContent = data.activities.length;
+                    const cardActs = document.getElementById('card-stat-acts');
+                    if (cardActs) cardActs.textContent = `📋 ${data.activities.length} actividades`;
+                }
+            } catch (e) {
+                document.getElementById('stat-actividades').textContent = '0';
+            }
+
+            try {
+                const res = await fetch('/api/notifications/list.php', { credentials: 'include' });
+                const data = await res.json();
+                if (data.success) {
+                    const cardNotifs = document.getElementById('card-stat-notifs');
+                    if (cardNotifs) cardNotifs.textContent = `🔔 ${data.notifications.length} avisos enviados`;
+                }
+            } catch (e) {
+                const cardNotifs = document.getElementById('card-stat-notifs');
+                if (cardNotifs) cardNotifs.textContent = '🔔 Historial activo';
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,28 @@
+# ===========================================================================
+# Lengua y Literatura 9no EGB - Protección de Directorios
+# ===========================================================================
+
+# Proteger archivos sensibles
+<FilesMatch "\.(sql|md|log|env)$">
+    Order Allow,Deny
+    Deny from all
+</FilesMatch>
+
+# Proteger directorio de configuración API
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    
+    # Bloquear acceso directo a config/
+    RewriteRule ^api/config/ - [F,L]
+    
+    # Bloquear acceso a archivos SQL
+    RewriteRule ^sql/ - [F,L]
+</IfModule>
+
+# Proteger uploads - solo servir archivos permitidos
+<Directory "uploads">
+    <FilesMatch "\.(php|phtml|php3|php4|php5|phps)$">
+        Order Allow,Deny
+        Deny from all
+    </FilesMatch>
+</Directory>

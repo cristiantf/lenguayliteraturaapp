@@ -33,8 +33,14 @@ function updateThemeIcon(theme) {
     }
 }
 
+const Theme = {
+    init: initThemeToggle,
+    updateIcon: updateThemeIcon
+};
+
 // Exportación global y modular
 if (typeof window !== 'undefined') {
+    window.Theme = Theme;
     window.initThemeToggle = initThemeToggle;
     window.updateThemeIcon = updateThemeIcon;
 }

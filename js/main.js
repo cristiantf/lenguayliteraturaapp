@@ -32,8 +32,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    // Vista de Laboratorio de Figuras Literarias (Flashcards 3D)
-    if (document.querySelector('.flashcard')) {
+    // Vista de Fichas de Conceptos — Renderizado Dinámico desde flashcardsData.js
+    if (document.getElementById('flashcards-dynamic-container')) {
+        if (typeof initFlashcardsRenderer === 'function') {
+            initFlashcardsRenderer();
+        }
+    }
+    // Vista de Laboratorio de Figuras Literarias (Flashcards 3D estáticas)
+    else if (document.querySelector('.flashcard')) {
         if (typeof initFlashcards === 'function') {
             initFlashcards();
         }

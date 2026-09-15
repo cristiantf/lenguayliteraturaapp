@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Centro de Notificaciones | Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/views/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- ── Sidebar ──────────────────────────────────────── -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../../index.html" class="logo">
+                    <div class="logo-icon">📖</div>
+                    <div class="logo-text">Lengua<span>9ºEGB</span></div>
+                </a>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar-letter">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-display-name">Administrador</div>
+                    <div class="user-role" id="user-display-role">Administrador</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Principal</div>
+                <a href="index.html">
+                    <span class="nav-icon">🏠</span> Panel de Control
+                </a>
+                <a href="usuarios.html">
+                    <span class="nav-icon">👥</span> Gestionar Usuarios
+                </a>
+
+                <div class="nav-section-title">Gestión Académica</div>
+                <a href="actividades.html">
+                    <span class="nav-icon">📋</span> Supervisar Actividades
+                </a>
+                <a href="notificaciones.html" class="active">
+                    <span class="nav-icon">🔔</span> Notificaciones y Avisos
+                    <span class="nav-badge" id="sidebar-notif-count" style="display:none;">0</span>
+                </a>
+
+                <div class="nav-section-title">Plataforma</div>
+                <a href="../../index.html" target="_blank">
+                    <span class="nav-icon">🌐</span> Ver Portal Público
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="btn-logout">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- ── Contenido Principal ──────────────────────────── -->
+        <main class="dashboard-main">
+            <div class="dashboard-topbar">
+                <div>
+                    <h1>🔔 Centro de Notificaciones y Comunicados</h1>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">Registro de alertas, auditoría de eventos y emisión de anuncios institucionales</p>
+                </div>
+                <div class="topbar-actions">
+                    <button class="btn btn-primary" id="btn-open-broadcast" style="display:flex; align-items:center; gap:0.5rem;">
+                        <span>📢</span> Emitir Comunicado
+                    </button>
+                    <!-- Notificaciones dropdown -->
+                    <div class="notif-dropdown">
+                        <button class="notif-trigger" id="notif-btn" aria-label="Notificaciones">
+                            🔔
+                            <span class="notif-count" id="notif-count" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-header">
+                                <h4>Notificaciones</h4>
+                                <button class="btn btn-sm" id="notif-mark-all-dropdown" style="font-size:0.75rem; background:none; border:none; color:var(--primary); cursor:pointer;">Marcar todas</button>
+                            </div>
+                            <div id="notif-list">
+                                <div style="padding:2rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">Sin notificaciones</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon theme-toggle" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">🔔</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-total-notif">—</div>
+                        <div class="stat-label">Total Notificaciones</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-rose">📬</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-unread-notif">—</div>
+                        <div class="stat-label">Sin Leer (Admin)</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-emerald">📢</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-comunicados-notif">—</div>
+                        <div class="stat-label">Comunicados Oficiales</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple">⚡</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-academicas-notif">—</div>
+                        <div class="stat-label">Eventos Académicos</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros y Opciones -->
+            <div class="card mb-4" style="padding: 1.25rem; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--surface);">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-4 col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text" style="background:var(--bg-secondary); border-color:var(--border-color); color:var(--text-muted);">🔍</span>
+                            <input type="text" id="search-notif" class="form-control" placeholder="Buscar por título, contenido o usuario..." style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <select id="filter-scope" class="form-select" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                            <option value="all">Auditoría Global (Toda la plataforma)</option>
+                            <option value="mine">Solo dirigidas a mí (Administrador)</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <select id="filter-type" class="form-select" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                            <option value="all">Todos los tipos de aviso</option>
+                            <option value="comunicado">📢 Comunicados Oficiales</option>
+                            <option value="nueva_actividad">📋 Nueva Actividad</option>
+                            <option value="entrega_pendiente">📥 Entregas Recibidas</option>
+                            <option value="actividad_calificada">✅ Actividades Calificadas</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6 text-end">
+                        <button class="btn btn-outline-primary btn-sm w-100" id="btn-mark-all-read" style="padding: 0.5rem;">
+                            ✓ Marcar Leídas
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenedor de Lista de Notificaciones -->
+            <div class="card" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--surface); overflow:hidden;">
+                <div id="notifications-container" style="padding: 1rem;">
+                    <div style="text-align:center; padding:3rem; color:var(--text-muted);">Cargando notificaciones...</div>
+                </div>
+                <div id="notif-pagination"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Emitir Comunicado -->
+    <div class="modal fade" id="broadcastModal" tabindex="-1" aria-labelledby="broadcastModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content" style="background:var(--surface); color:var(--text-color); border:1px solid var(--border-color); border-radius:var(--radius-lg);">
+                <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                    <h5 class="modal-title" id="broadcastModalLabel">📢 Emitir Comunicado Institucional</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="broadcast-form">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="bc-destinatarios" style="font-size:0.85rem; font-weight:600;">Destinatarios *</label>
+                            <select class="form-select" id="bc-destinatarios" required style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                                <option value="todos">🌐 Todos los usuarios (Docentes y Estudiantes)</option>
+                                <option value="docente">👩‍🏫 Solo Personal Docente</option>
+                                <option value="estudiante">👨‍🎓 Solo Estudiantes</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="bc-titulo" style="font-size:0.85rem; font-weight:600;">Título del Comunicado *</label>
+                            <input type="text" class="form-control" id="bc-titulo" required placeholder="Ej. Inicio del Período de Evaluaciones Quimestrales" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="bc-mensaje" style="font-size:0.85rem; font-weight:600;">Contenido del Mensaje *</label>
+                            <textarea class="form-control" id="bc-mensaje" rows="4" required placeholder="Escribe el mensaje formal que recibirán los usuarios en su centro de notificaciones..." style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="bc-enlace" style="font-size:0.85rem; font-weight:600;">Enlace de Destino (Opcional)</label>
+                            <input type="text" class="form-control" id="bc-enlace" placeholder="Ej. index.html#modulos o dashboard/docente/actividades.html" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                        </div>
+                    </div>
+                    <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary" id="btn-send-bc">🚀 Enviar Notificación</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="../../js/modules/toast.js"></script>
+    <script src="../../js/modules/theme.js"></script>
+    <script src="../../js/modules/auth.js"></script>
+    <script src="../../js/modules/notifications.js"></script>
+    <script>
+        const AdminNotif = {
+            notifications: [],
+            currentPage: 1,
+            pageSize: 6,
+            searchQuery: '',
+            filterScope: 'all',
+            filterType: 'all',
+
+            async init() {
+                await this.loadNotifications();
+                this.bindEvents();
+            },
+
+            bindEvents() {
+                document.getElementById('search-notif')?.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value.toLowerCase().trim();
+                    this.currentPage = 1;
+                    this.render();
+                });
+
+                document.getElementById('filter-scope')?.addEventListener('change', (e) => {
+                    this.filterScope = e.target.value;
+                    this.currentPage = 1;
+                    this.loadNotifications();
+                });
+
+                document.getElementById('filter-type')?.addEventListener('change', (e) => {
+                    this.filterType = e.target.value;
+                    this.currentPage = 1;
+                    this.render();
+                });
+
+                document.getElementById('btn-mark-all-read')?.addEventListener('click', () => this.markAllRead());
+
+                document.getElementById('btn-open-broadcast')?.addEventListener('click', () => {
+                    const modalElem = document.getElementById('broadcastModal');
+                    if (modalElem) {
+                        document.getElementById('broadcast-form').reset();
+                        new bootstrap.Modal(modalElem).show();
+                    }
+                });
+
+                document.getElementById('broadcast-form')?.addEventListener('submit', (e) => this.handleBroadcast(e));
+            },
+
+            async loadNotifications() {
+                const container = document.getElementById('notifications-container');
+                if (container) {
+                    container.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);">Cargando notificaciones...</div>`;
+                }
+
+                try {
+                    const isAll = this.filterScope === 'all' ? 1 : 0;
+                    const res = await fetch(`/api/notifications/list.php?all=${isAll}&limit=100`, { credentials: 'include' });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        this.notifications = data.notifications || [];
+                        this.updateStats();
+                        this.render();
+                    } else {
+                        Toast.show(data.error || 'Error al cargar notificaciones', 'error');
+                    }
+                } catch (e) {
+                    console.error('Error:', e);
+                    Toast.show('Error de conexión al cargar notificaciones', 'error');
+                }
+            },
+
+            updateStats() {
+                let unread = 0, comunicados = 0, academicas = 0;
+                this.notifications.forEach(n => {
+                    if (!n.leida) unread++;
+                    if (n.tipo === 'comunicado') comunicados++;
+                    if (n.tipo === 'nueva_actividad' || n.tipo === 'entrega_pendiente' || n.tipo === 'actividad_calificada') {
+                        academicas++;
+                    }
+                });
+
+                document.getElementById('stat-total-notif').textContent = this.notifications.length;
+                document.getElementById('stat-unread-notif').textContent = unread;
+                document.getElementById('stat-comunicados-notif').textContent = comunicados;
+                document.getElementById('stat-academicas-notif').textContent = academicas;
+            },
+
+            render() {
+                const container = document.getElementById('notifications-container');
+                if (!container) return;
+
+                let filtered = this.notifications.filter(n => {
+                    // Match Search
+                    const targetInfo = `${n.usuario_nombre || ''} ${n.usuario_apellido || ''} ${n.usuario_email || ''}`;
+                    const fullText = `${n.titulo} ${n.mensaje} ${targetInfo}`.toLowerCase();
+                    if (this.searchQuery && !fullText.includes(this.searchQuery)) return false;
+
+                    // Match Type
+                    if (this.filterType !== 'all' && n.tipo !== this.filterType) return false;
+
+                    return true;
+                });
+
+                const totalItems = filtered.length;
+                const totalPages = Math.ceil(totalItems / this.pageSize) || 1;
+                if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+                if (totalItems === 0) {
+                    container.innerHTML = `
+                        <div style="text-align:center; padding:3.5rem; color:var(--text-muted);">
+                            <div style="font-size:2.5rem; margin-bottom:0.75rem;">🔕</div>
+                            <h5>No hay notificaciones registradas</h5>
+                            <p style="font-size:0.9rem; margin:0;">Prueba modificando los filtros de búsqueda o emite un comunicado.</p>
+                        </div>
+                    `;
+                    this.renderPagination(0, 1);
+                    return;
+                }
+
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const pageItems = filtered.slice(startIndex, startIndex + this.pageSize);
+
+                const iconMap = {
+                    'comunicado': { icon: '📢', bg: 'rgba(99, 102, 241, 0.15)', color: '#6366f1' },
+                    'nueva_actividad': { icon: '📋', bg: 'rgba(16, 185, 129, 0.15)', color: '#10b981' },
+                    'entrega_pendiente': { icon: '📥', bg: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b' },
+                    'actividad_calificada': { icon: '✅', bg: 'rgba(139, 92, 246, 0.15)', color: '#8b5cf6' }
+                };
+
+                const roleBadges = {
+                    'admin': '<span class="badge" style="background:#6366f1; color:#fff; font-size:0.7rem;">Admin</span>',
+                    'docente': '<span class="badge" style="background:#10b981; color:#fff; font-size:0.7rem;">Docente</span>',
+                    'estudiante': '<span class="badge" style="background:#3b82f6; color:#fff; font-size:0.7rem;">Estudiante</span>'
+                };
+
+                container.innerHTML = `
+                    <div style="display:flex; flex-direction:column; gap:0.85rem;">
+                        ${pageItems.map(n => {
+                            const conf = iconMap[n.tipo] || { icon: '🔔', bg: 'rgba(100, 116, 139, 0.15)', color: '#64748b' };
+                            const timeAgo = this.timeAgo(n.created_at);
+
+                            return `
+                                <div class="card" style="padding:1.15rem 1.25rem; border:1px solid var(--border-color); border-radius:var(--radius-md); background: ${n.leida ? 'var(--surface)' : 'rgba(99, 102, 241, 0.04)'}; border-left: 4px solid ${n.leida ? 'var(--border-color)' : conf.color}; transition:transform 0.2s;">
+                                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:1rem;">
+                                        <div style="display:flex; gap:1rem; align-items:flex-start;">
+                                            <div style="width:40px; height:40px; border-radius:10px; background:${conf.bg}; color:${conf.color}; display:flex; align-items:center; justify-content:center; font-size:1.25rem; flex-shrink:0;">
+                                                ${conf.icon}
+                                            </div>
+                                            <div>
+                                                <div style="display:flex; align-items:center; gap:0.5rem; flex-wrap:wrap; margin-bottom:0.25rem;">
+                                                    <strong style="font-size:0.95rem; color:var(--text-color);">${this.escape(n.titulo)}</strong>
+                                                    ${n.usuario_nombre ? `
+                                                        <span style="font-size:0.8rem; color:var(--text-muted); display:inline-flex; align-items:center; gap:0.35rem;">
+                                                            → Para: <strong>${this.escape(n.usuario_nombre)} ${this.escape(n.usuario_apellido)}</strong>
+                                                            ${roleBadges[n.usuario_rol] || ''}
+                                                        </span>
+                                                    ` : ''}
+                                                    ${!n.leida ? '<span class="badge bg-danger" style="font-size:0.65rem;">No leída</span>' : ''}
+                                                </div>
+                                                <p style="margin:0 0 0.5rem 0; font-size:0.875rem; color:var(--text-color); line-height:1.5;">${this.escape(n.mensaje)}</p>
+                                                <div style="display:flex; align-items:center; gap:1rem; font-size:0.78rem; color:var(--text-muted);">
+                                                    <span>🕒 ${timeAgo}</span>
+                                                    ${n.enlace ? `<a href="/${n.enlace}" style="color:var(--primary); text-decoration:underline;">Ver recurso vinculado →</a>` : ''}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            ${!n.leida ? `
+                                                <button class="btn btn-sm btn-outline-secondary" onclick="AdminNotif.markRead(${n.id})" title="Marcar como leída" style="font-size:0.75rem; padding:0.25rem 0.6rem; white-space:nowrap;">
+                                                    ✓ Leída
+                                                </button>
+                                            ` : `
+                                                <span style="font-size:0.75rem; color:var(--text-muted); white-space:nowrap;">✓ Leída</span>
+                                            `}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+                `;
+
+                this.renderPagination(totalItems, totalPages);
+            },
+
+            renderPagination(totalItems, totalPages) {
+                const container = document.getElementById('notif-pagination');
+                if (!container) return;
+
+                if (totalItems === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                const start = (this.currentPage - 1) * this.pageSize + 1;
+                const end = Math.min(this.currentPage * this.pageSize, totalItems);
+
+                let html = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:1rem; font-size:0.875rem;">
+                        <div style="color:var(--text-muted);">
+                            Mostrando <strong>${start}-${end}</strong> de <strong>${totalItems}</strong> notificaciones
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.35rem;">
+                            <button class="btn btn-sm btn-outline-secondary" ${this.currentPage <= 1 ? 'disabled' : ''} onclick="AdminNotif.goToPage(${this.currentPage - 1})">
+                                ◀ Anterior
+                            </button>
+                `;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= this.currentPage - 1 && i <= this.currentPage + 1)) {
+                        html += `
+                            <button class="btn btn-sm ${i === this.currentPage ? 'btn-primary' : 'btn-outline-secondary'}" onclick="AdminNotif.goToPage(${i})" style="min-width:32px;">
+                                ${i}
+                            </button>
+                        `;
+                    } else if (i === this.currentPage - 2 || i === this.currentPage + 2) {
+                        html += `<span style="padding:0 0.25rem; color:var(--text-muted);">...</span>`;
+                    }
+                }
+
+                html += `
+                            <button class="btn btn-sm btn-outline-secondary" ${this.currentPage >= totalPages ? 'disabled' : ''} onclick="AdminNotif.goToPage(${this.currentPage + 1})">
+                                Siguiente ▶
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            },
+
+            goToPage(page) {
+                this.currentPage = page;
+                this.render();
+            },
+
+            async markRead(id) {
+                try {
+                    await fetch('/api/notifications/read.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ id })
+                    });
+                    const item = this.notifications.find(n => n.id == id);
+                    if (item) item.leida = 1;
+                    this.updateStats();
+                    this.render();
+                    if (typeof Notifications !== 'undefined') Notifications.loadCount();
+                } catch (e) {
+                    Toast.show('Error al actualizar estado', 'error');
+                }
+            },
+
+            async markAllRead() {
+                try {
+                    const res = await fetch('/api/notifications/read.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ all: true })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Toast.show('Todas las notificaciones fueron marcadas como leídas', 'success');
+                        this.notifications.forEach(n => n.leida = 1);
+                        this.updateStats();
+                        this.render();
+                        if (typeof Notifications !== 'undefined') Notifications.loadCount();
+                    }
+                } catch (e) {
+                    Toast.show('Error al marcar leídas', 'error');
+                }
+            },
+
+            async handleBroadcast(e) {
+                e.preventDefault();
+                const destinatarios = document.getElementById('bc-destinatarios').value;
+                const titulo = document.getElementById('bc-titulo').value.trim();
+                const mensaje = document.getElementById('bc-mensaje').value.trim();
+                const enlace = document.getElementById('bc-enlace').value.trim();
+
+                const btn = document.getElementById('btn-send-bc');
+                if (btn) btn.disabled = true;
+
+                try {
+                    const res = await fetch('/api/notifications/broadcast.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ destinatarios, titulo, mensaje, enlace })
+                    });
+                    const data = await res.json();
+
+                    if (data.success) {
+                        Toast.show(data.message || 'Comunicado emitido exitosamente', 'success');
+                        const modalElem = document.getElementById('broadcastModal');
+                        const modal = bootstrap.Modal.getInstance(modalElem);
+                        if (modal) modal.hide();
+                        await this.loadNotifications();
+                    } else {
+                        Toast.show(data.error || 'Error al emitir comunicado', 'error');
+                    }
+                } catch (err) {
+                    Toast.show('Error de conexión', 'error');
+                } finally {
+                    if (btn) btn.disabled = false;
+                }
+            },
+
+            timeAgo(dateStr) {
+                const date = new Date(dateStr);
+                const now  = new Date();
+                const diff = Math.floor((now - date) / 1000);
+                
+                if (diff < 60)   return 'Hace un momento';
+                if (diff < 3600)  return `Hace ${Math.floor(diff / 60)} min`;
+                if (diff < 86400) return `Hace ${Math.floor(diff / 3600)} h`;
+                if (diff < 604800) return `Hace ${Math.floor(diff / 86400)} día(s)`;
+                return date.toLocaleDateString('es-EC');
+            },
+
+            escape(text) {
+                if (!text) return '';
+                return String(text).replace(/[&<>"']/g, m => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+                }[m]));
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            Theme.init();
+            const user = await Auth.requireRole('admin');
+            if (user) {
+                document.getElementById('user-display-name').textContent = `${user.nombre} ${user.apellido}`;
+                document.getElementById('user-avatar-letter').textContent = (user.nombre || 'A').charAt(0).toUpperCase();
+                Notifications.init();
+                AdminNotif.init();
+
+                document.getElementById('btn-logout').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    Auth.logout();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

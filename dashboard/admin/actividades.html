@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supervisión de Actividades | Administrador</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="../../css/base.css">
+    <link rel="stylesheet" href="../../css/components.css">
+    <link rel="stylesheet" href="../../css/views/dashboard.css">
+</head>
+<body>
+    <div class="dashboard-layout">
+        <!-- ── Sidebar ──────────────────────────────────────── -->
+        <aside class="dashboard-sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="../../index.html" class="logo">
+                    <div class="logo-icon">📖</div>
+                    <div class="logo-text">Lengua<span>9ºEGB</span></div>
+                </a>
+            </div>
+
+            <div class="sidebar-user">
+                <div class="user-avatar" id="user-avatar-letter">A</div>
+                <div class="user-info">
+                    <div class="user-name" id="user-display-name">Administrador</div>
+                    <div class="user-role" id="user-display-role">Administrador</div>
+                </div>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Principal</div>
+                <a href="index.html">
+                    <span class="nav-icon">🏠</span> Panel de Control
+                </a>
+                <a href="usuarios.html">
+                    <span class="nav-icon">👥</span> Gestionar Usuarios
+                </a>
+
+                <div class="nav-section-title">Gestión Académica</div>
+                <a href="actividades.html" class="active">
+                    <span class="nav-icon">📋</span> Supervisar Actividades
+                </a>
+                <a href="notificaciones.html">
+                    <span class="nav-icon">🔔</span> Notificaciones y Avisos
+                    <span class="nav-badge" id="sidebar-notif-count" style="display:none;">0</span>
+                </a>
+
+                <div class="nav-section-title">Plataforma</div>
+                <a href="../../index.html" target="_blank">
+                    <span class="nav-icon">🌐</span> Ver Portal Público
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <a href="#" id="btn-logout">
+                    <span>🚪</span> Cerrar Sesión
+                </a>
+            </div>
+        </aside>
+
+        <!-- ── Contenido Principal ──────────────────────────── -->
+        <main class="dashboard-main">
+            <div class="dashboard-topbar">
+                <div>
+                    <h1>📋 Supervisión General de Actividades</h1>
+                    <p style="color:var(--text-muted); font-size:0.9rem; margin:0;">Auditoría, control de estados y seguimiento de tareas creadas por los docentes</p>
+                </div>
+                <div class="topbar-actions">
+                    <!-- Notificaciones -->
+                    <div class="notif-dropdown">
+                        <button class="notif-trigger" id="notif-btn" aria-label="Notificaciones">
+                            🔔
+                            <span class="notif-count" id="notif-count" style="display:none;">0</span>
+                        </button>
+                        <div class="notif-panel" id="notif-panel">
+                            <div class="notif-header">
+                                <h4>Notificaciones</h4>
+                                <button class="btn btn-sm" id="notif-mark-all" style="font-size:0.75rem; background:none; border:none; color:var(--primary); cursor:pointer;">Marcar todas</button>
+                            </div>
+                            <div id="notif-list">
+                                <div style="padding:2rem; text-align:center; color:var(--text-muted); font-size:0.85rem;">Sin notificaciones</div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-icon theme-toggle" id="theme-toggle" aria-label="Cambiar tema">🌙</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon bg-primary">📋</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-total-act">—</div>
+                        <div class="stat-label">Total Actividades</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-emerald">✅</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-activas-act">—</div>
+                        <div class="stat-label">Activas en Portal</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-amber">📥</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-entregas-act">—</div>
+                        <div class="stat-label">Entregas de Alumnos</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon bg-purple">⭐</div>
+                    <div class="stat-info">
+                        <div class="stat-value" id="stat-calificadas-act">—</div>
+                        <div class="stat-label">Calificadas por Docente</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filtros y Búsqueda -->
+            <div class="card mb-4" style="padding: 1.25rem; border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--surface);">
+                <div class="row g-3 align-items-center">
+                    <div class="col-lg-5 col-md-6">
+                        <div class="input-group">
+                            <span class="input-group-text" style="background:var(--bg-secondary); border-color:var(--border-color); color:var(--text-muted);">🔍</span>
+                            <input type="text" id="search-activities" class="form-control" placeholder="Buscar por título, contenido o docente..." style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                        </div>
+                    </div>
+                    <div class="col-lg-3 col-md-6">
+                        <div class="d-flex align-items-center gap-2">
+                            <label for="filter-docente" style="font-size:0.85rem; color:var(--text-muted); white-space:nowrap;">Docente:</label>
+                            <select id="filter-docente" class="form-select" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                                <option value="all">Todos los docentes</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <select id="filter-status" class="form-select" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                            <option value="all">Todos los estados</option>
+                            <option value="activa">Solo Activas</option>
+                            <option value="inactiva">Solo Pausadas</option>
+                            <option value="vencida">Plazo Vencido</option>
+                        </select>
+                    </div>
+                    <div class="col-lg-2 col-md-6">
+                        <select id="filter-type" class="form-select" style="background:var(--bg-primary); border-color:var(--border-color); color:var(--text-color);">
+                            <option value="all">Todos los tipos</option>
+                            <option value="archivo">Archivo / Tarea</option>
+                            <option value="quiz">Quiz / Cuestionario</option>
+                            <option value="mixta">Mixta</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tabla de Actividades -->
+            <div class="card" style="border: 1px solid var(--border-color); border-radius: var(--radius-lg); background: var(--surface); overflow:hidden;">
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0" style="color:var(--text-color);">
+                        <thead style="background:var(--bg-secondary); border-bottom:1px solid var(--border-color); font-size:0.85rem; text-transform:uppercase; letter-spacing:0.5px;">
+                            <tr>
+                                <th style="padding:1rem;">ID</th>
+                                <th>Actividad</th>
+                                <th>Docente</th>
+                                <th>Tipo & Nota</th>
+                                <th>Fecha Límite</th>
+                                <th>Estado</th>
+                                <th>Entregas</th>
+                                <th style="text-align:right; padding-right:1.5rem;">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-activities-table">
+                            <tr>
+                                <td colspan="8" style="text-align:center; padding:2rem; color:var(--text-muted);">Cargando actividades...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div id="admin-act-pagination"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modal para Inspeccionar Entregas de la Actividad -->
+    <div class="modal fade" id="submissionsModal" tabindex="-1" aria-labelledby="submissionsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content" style="background:var(--surface); color:var(--text-color); border:1px solid var(--border-color); border-radius:var(--radius-lg);">
+                <div class="modal-header" style="border-bottom:1px solid var(--border-color);">
+                    <div>
+                        <h5 class="modal-title" id="submissionsModalLabel">Entregas de la Actividad</h5>
+                        <small id="modal-act-subtitle" style="color:var(--text-muted);"></small>
+                    </div>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0">
+                    <div class="table-responsive" style="max-height: 400px;">
+                        <table class="table align-middle mb-0" style="color:var(--text-color);">
+                            <thead style="background:var(--bg-secondary); font-size:0.8rem; text-transform:uppercase;">
+                                <tr>
+                                    <th style="padding:0.75rem 1rem;">Estudiante</th>
+                                    <th>Fecha Entrega</th>
+                                    <th>Estado</th>
+                                    <th>Calificación</th>
+                                    <th>Comentarios Docente</th>
+                                </tr>
+                            </thead>
+                            <tbody id="modal-submissions-list">
+                                <tr>
+                                    <td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">Cargando entregas...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="modal-footer" style="border-top:1px solid var(--border-color);">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS Bundle -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <script src="../../js/modules/toast.js"></script>
+    <script src="../../js/modules/theme.js"></script>
+    <script src="../../js/modules/auth.js"></script>
+    <script src="../../js/modules/notifications.js"></script>
+    <script>
+        const AdminActivities = {
+            activities: [],
+            currentPage: 1,
+            pageSize: 5,
+            searchQuery: '',
+            filterDocente: 'all',
+            filterStatus: 'all',
+            filterType: 'all',
+
+            async init() {
+                await this.loadActivities();
+                this.bindEvents();
+            },
+
+            bindEvents() {
+                document.getElementById('search-activities')?.addEventListener('input', (e) => {
+                    this.searchQuery = e.target.value.toLowerCase().trim();
+                    this.currentPage = 1;
+                    this.render();
+                });
+
+                document.getElementById('filter-docente')?.addEventListener('change', (e) => {
+                    this.filterDocente = e.target.value;
+                    this.currentPage = 1;
+                    this.render();
+                });
+
+                document.getElementById('filter-status')?.addEventListener('change', (e) => {
+                    this.filterStatus = e.target.value;
+                    this.currentPage = 1;
+                    this.render();
+                });
+
+                document.getElementById('filter-type')?.addEventListener('change', (e) => {
+                    this.filterType = e.target.value;
+                    this.currentPage = 1;
+                    this.render();
+                });
+            },
+
+            async loadActivities() {
+                try {
+                    const res = await fetch('/api/activities/list.php', { credentials: 'include' });
+                    const data = await res.json();
+                    if (data.success) {
+                        this.activities = data.activities || [];
+                        this.populateDocentes();
+                        this.updateStats();
+                        this.render();
+                    } else {
+                        Toast.show(data.error || 'Error al cargar actividades', 'error');
+                    }
+                } catch (e) {
+                    console.error('Error:', e);
+                    Toast.show('Error de conexión al cargar actividades', 'error');
+                }
+            },
+
+            populateDocentes() {
+                const select = document.getElementById('filter-docente');
+                if (!select) return;
+
+                const docentesMap = new Map();
+                this.activities.forEach(a => {
+                    if (a.docente_id && (a.docente_nombre || a.docente_apellido)) {
+                        docentesMap.set(a.docente_id, `${a.docente_nombre || ''} ${a.docente_apellido || ''}`.trim());
+                    }
+                });
+
+                let options = '<option value="all">Todos los docentes</option>';
+                docentesMap.forEach((nombre, id) => {
+                    options += `<option value="${id}">${this.escape(nombre)}</option>`;
+                });
+                select.innerHTML = options;
+            },
+
+            updateStats() {
+                let activas = 0, totalEntregas = 0, totalCalificadas = 0;
+                this.activities.forEach(a => {
+                    if (a.activa == 1) activas++;
+                    totalEntregas += parseInt(a.total_entregas || 0);
+                    totalCalificadas += parseInt(a.total_calificadas || 0);
+                });
+
+                document.getElementById('stat-total-act').textContent = this.activities.length;
+                document.getElementById('stat-activas-act').textContent = activas;
+                document.getElementById('stat-entregas-act').textContent = totalEntregas;
+                document.getElementById('stat-calificadas-act').textContent = totalCalificadas;
+            },
+
+            render() {
+                const tbody = document.getElementById('admin-activities-table');
+                if (!tbody) return;
+
+                const now = new Date();
+                let filtered = this.activities.filter(a => {
+                    // Match Search
+                    const fullText = `${a.titulo} ${a.descripcion || ''} ${a.docente_nombre || ''} ${a.docente_apellido || ''}`.toLowerCase();
+                    if (this.searchQuery && !fullText.includes(this.searchQuery)) return false;
+
+                    // Match Docente
+                    if (this.filterDocente !== 'all' && String(a.docente_id) !== this.filterDocente) return false;
+
+                    // Match Type
+                    if (this.filterType !== 'all' && a.tipo !== this.filterType) return false;
+
+                    // Match Status
+                    const isExpired = a.fecha_limite && new Date(a.fecha_limite) < now;
+                    if (this.filterStatus === 'activa' && a.activa != 1) return false;
+                    if (this.filterStatus === 'inactiva' && a.activa == 1) return false;
+                    if (this.filterStatus === 'vencida' && !isExpired) return false;
+
+                    return true;
+                });
+
+                const totalItems = filtered.length;
+                const totalPages = Math.ceil(totalItems / this.pageSize) || 1;
+                if (this.currentPage > totalPages) this.currentPage = totalPages;
+
+                if (totalItems === 0) {
+                    tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:2.5rem; color:var(--text-muted);">No se encontraron actividades con los filtros seleccionados.</td></tr>`;
+                    this.renderPagination(0, 1);
+                    return;
+                }
+
+                const startIndex = (this.currentPage - 1) * this.pageSize;
+                const pageItems = filtered.slice(startIndex, startIndex + this.pageSize);
+
+                const typeBadges = {
+                    'archivo': '<span class="badge" style="background:#3b82f6; color:#fff;">📄 Archivo</span>',
+                    'quiz': '<span class="badge" style="background:#8b5cf6; color:#fff;">❓ Quiz</span>',
+                    'mixta': '<span class="badge" style="background:#06b6d4; color:#fff;">📋 Mixta</span>'
+                };
+
+                tbody.innerHTML = pageItems.map(a => {
+                    const isExpired = a.fecha_limite && new Date(a.fecha_limite) < now;
+                    const dateFormatted = a.fecha_limite 
+                        ? new Date(a.fecha_limite).toLocaleString('es-EC', { dateStyle: 'short', timeStyle: 'short' }) 
+                        : 'Sin límite';
+
+                    return `
+                        <tr>
+                            <td><strong>#${a.id}</strong></td>
+                            <td>
+                                <div style="font-weight:600; color:var(--text-color);">${this.escape(a.titulo)}</div>
+                                <small style="color:var(--text-muted); display:-webkit-box; -webkit-line-clamp:1; -webkit-box-orient:vertical; overflow:hidden;">
+                                    ${this.escape(a.descripcion || 'Sin descripción')}
+                                </small>
+                            </td>
+                            <td>
+                                <div style="font-weight:500; font-size:0.9rem;">${this.escape(a.docente_nombre || '')} ${this.escape(a.docente_apellido || '')}</div>
+                            </td>
+                            <td>
+                                <div>${typeBadges[a.tipo] || a.tipo}</div>
+                                <small style="color:var(--text-muted); font-weight:600;">Máx: ${parseFloat(a.nota_maxima || 10).toFixed(2)} pts</small>
+                            </td>
+                            <td>
+                                <span class="${isExpired ? 'text-danger' : 'text-muted'}" style="font-size:0.85rem;">
+                                    📅 ${dateFormatted}
+                                    ${isExpired ? '<span class="badge bg-danger ms-1" style="font-size:0.65rem;">Vencida</span>' : ''}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="form-check form-switch">
+                                    <input class="form-check-input" type="checkbox" role="switch" id="switch-act-${a.id}" 
+                                        ${a.activa == 1 ? 'checked' : ''} 
+                                        onchange="AdminActivities.toggleStatus(${a.id}, this.checked)">
+                                    <label class="form-check-label" for="switch-act-${a.id}" style="font-size:0.8rem;">
+                                        ${a.activa == 1 ? '<span class="text-success font-weight-bold">Activa</span>' : '<span class="text-secondary">Pausada</span>'}
+                                    </label>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="badge" style="background:var(--bg-secondary); color:var(--text-color); border:1px solid var(--border-color); font-size:0.8rem;">
+                                    📥 ${a.total_entregas || 0} ent. / ⭐ ${a.total_calificadas || 0} cal.
+                                </span>
+                            </td>
+                            <td style="text-align:right;">
+                                <div style="display:flex; justify-content:flex-end; gap:0.4rem;">
+                                    <button class="btn btn-sm btn-outline-info" onclick="AdminActivities.viewSubmissions(${a.id}, '${this.escape(a.titulo)}')" title="Ver Entregas de Alumnos">
+                                        👁️ Entregas
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" onclick="AdminActivities.confirmDelete(${a.id}, '${this.escape(a.titulo)}')" title="Eliminar Actividad">
+                                        🗑️
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                    `;
+                }).join('');
+
+                this.renderPagination(totalItems, totalPages);
+            },
+
+            renderPagination(totalItems, totalPages) {
+                const container = document.getElementById('admin-act-pagination');
+                if (!container) return;
+
+                if (totalItems === 0) {
+                    container.innerHTML = '';
+                    return;
+                }
+
+                const start = (this.currentPage - 1) * this.pageSize + 1;
+                const end = Math.min(this.currentPage * this.pageSize, totalItems);
+
+                let html = `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:1rem 1.25rem; border-top:1px solid var(--border-color); flex-wrap:wrap; gap:1rem; font-size:0.875rem;">
+                        <div style="color:var(--text-muted);">
+                            Mostrando <strong>${start}-${end}</strong> de <strong>${totalItems}</strong> actividades
+                        </div>
+                        <div style="display:flex; align-items:center; gap:0.35rem;">
+                            <button class="btn btn-sm btn-outline-secondary" ${this.currentPage <= 1 ? 'disabled' : ''} onclick="AdminActivities.goToPage(${this.currentPage - 1})">
+                                ◀ Anterior
+                            </button>
+                `;
+
+                for (let i = 1; i <= totalPages; i++) {
+                    if (i === 1 || i === totalPages || (i >= this.currentPage - 1 && i <= this.currentPage + 1)) {
+                        html += `
+                            <button class="btn btn-sm ${i === this.currentPage ? 'btn-primary' : 'btn-outline-secondary'}" onclick="AdminActivities.goToPage(${i})" style="min-width:32px;">
+                                ${i}
+                            </button>
+                        `;
+                    } else if (i === this.currentPage - 2 || i === this.currentPage + 2) {
+                        html += `<span style="padding:0 0.25rem; color:var(--text-muted);">...</span>`;
+                    }
+                }
+
+                html += `
+                            <button class="btn btn-sm btn-outline-secondary" ${this.currentPage >= totalPages ? 'disabled' : ''} onclick="AdminActivities.goToPage(${this.currentPage + 1})">
+                                Siguiente ▶
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            },
+
+            goToPage(page) {
+                this.currentPage = page;
+                this.render();
+            },
+
+            async toggleStatus(id, activa) {
+                try {
+                    const res = await fetch('/api/activities/toggle.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ id, activa: activa ? 1 : 0 })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Toast.show(`Actividad #${id} ${activa ? 'activada' : 'pausada'}`, 'info');
+                        const item = this.activities.find(a => a.id == id);
+                        if (item) item.activa = activa ? 1 : 0;
+                        this.updateStats();
+                        this.render();
+                    } else {
+                        Toast.show(data.error || 'Error al cambiar estado', 'error');
+                        await this.loadActivities();
+                    }
+                } catch (e) {
+                    Toast.show('Error de conexión', 'error');
+                }
+            },
+
+            async confirmDelete(id, titulo) {
+                if (!confirm(`¿Eliminar la actividad "${titulo}"? Esta acción borrará todas las entregas y notas asociadas.`)) {
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/activities/delete.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ id })
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        Toast.show('Actividad eliminada correctamente', 'success');
+                        await this.loadActivities();
+                    } else {
+                        Toast.show(data.error || 'No se pudo eliminar la actividad', 'error');
+                    }
+                } catch (e) {
+                    Toast.show('Error al eliminar', 'error');
+                }
+            },
+
+            async viewSubmissions(activityId, title) {
+                const modalElem = document.getElementById('submissionsModal');
+                const tbody = document.getElementById('modal-submissions-list');
+                const subtitle = document.getElementById('modal-act-subtitle');
+
+                if (subtitle) subtitle.textContent = `Actividad #${activityId}: ${title}`;
+                if (tbody) tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">Cargando entregas...</td></tr>`;
+
+                const modal = new bootstrap.Modal(modalElem);
+                modal.show();
+
+                try {
+                    const res = await fetch(`/api/grades/list.php?actividad_id=${activityId}`, { credentials: 'include' });
+                    const data = await res.json();
+
+                    if (data.success && data.submissions.length > 0) {
+                        tbody.innerHTML = data.submissions.map(s => {
+                            const hasGrade = s.calificacion !== null && s.calificacion !== undefined;
+                            return `
+                                <tr>
+                                    <td style="padding:0.75rem 1rem;">
+                                        <strong>${this.escape(s.estudiante_nombre)} ${this.escape(s.estudiante_apellido)}</strong>
+                                        <div style="font-size:0.75rem; color:var(--text-muted);">${this.escape(s.estudiante_email)}</div>
+                                    </td>
+                                    <td style="font-size:0.8rem; color:var(--text-muted);">
+                                        ${s.entregado_en ? new Date(s.entregado_en).toLocaleString('es-EC') : '—'}
+                                    </td>
+                                    <td>
+                                        <span class="badge ${s.estado === 'calificada' ? 'badge-success' : 'badge-warning'}" style="background:${s.estado === 'calificada' ? '#10b981' : '#f59e0b'}; color:#fff; font-size:0.75rem;">
+                                            ${s.estado === 'calificada' ? '✅ Calificada' : '⏳ Pendiente'}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        ${hasGrade ? `<strong style="color:var(--text-color); font-size:0.95rem;">⭐ ${parseFloat(s.calificacion).toFixed(2)} / ${parseFloat(s.nota_maxima || 10).toFixed(0)}</strong>` : '<span style="color:var(--text-muted);">Sin nota</span>'}
+                                    </td>
+                                    <td style="font-size:0.8rem; max-width:250px;">
+                                        ${s.retroalimentacion ? `<em>"${this.escape(s.retroalimentacion)}"</em>` : '<span style="color:var(--text-muted);">—</span>'}
+                                    </td>
+                                </tr>
+                            `;
+                        }).join('');
+                    } else {
+                        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--text-muted);">No se registran entregas de estudiantes para esta actividad todavía.</td></tr>`;
+                    }
+                } catch (e) {
+                    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:2rem; color:var(--accent-rose);">Error al cargar las entregas.</td></tr>`;
+                }
+            },
+
+            escape(text) {
+                if (!text) return '';
+                return String(text).replace(/[&<>"']/g, m => ({
+                    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#039;'
+                }[m]));
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            Theme.init();
+            const user = await Auth.requireRole('admin');
+            if (user) {
+                document.getElementById('user-display-name').textContent = `${user.nombre} ${user.apellido}`;
+                document.getElementById('user-avatar-letter').textContent = (user.nombre || 'A').charAt(0).toUpperCase();
+                Notifications.init();
+                AdminActivities.init();
+
+                document.getElementById('btn-logout').addEventListener('click', (e) => {
+                    e.preventDefault();
+                    Auth.logout();
+                });
+            }
+        });
+    </script>
+</body>
+</html>
