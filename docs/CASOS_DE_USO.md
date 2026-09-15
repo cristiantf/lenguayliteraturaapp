@@ -25,6 +25,10 @@ Este documento contiene la especificación formal y exhaustiva de los casos de u
 | **CU-05** | Entrenar Recursos Poéticos en el Laboratorio de Figuras Literarias | Estudiante | Media |
 | **CU-06** | Conmutar y Persistir el Tema de Color (Claro / Oscuro) | Estudiante / Docente | Media |
 | **CU-07** | Navegar entre Secciones mediante Enlaces Anclados y Scroll Suave | Estudiante / Docente | Baja |
+| **CU-08** | Iniciar Sesión y Redirección al Panel Correspondiente según Rol | Admin / Docente / Estudiante | Crítica |
+| **CU-09** | Crear y Configurar Quizzes de Opción Múltiple (Panel Docente) | Docente | Alta |
+| **CU-10** | Organizar Actividades, Responder Quiz y Obtener Calificación Automática | Estudiante | Crítica |
+| **CU-11** | Gestionar Cuentas de Usuario y Emitir Comunicados Globales | Administrador | Alta |
 
 ---
 
@@ -241,3 +245,88 @@ Este documento contiene la especificación formal y exhaustiva de los casos de u
 
 #### Reglas de Negocio:
 - **RN-07.1:** Los enlaces con `href="#"` vacío o huérfano deben ser ignorados por el controlador para evitar saltos indeseados a la parte superior de la página.
+
+---
+
+### CU-08: Iniciar Sesión y Redirección al Panel Correspondiente según Rol
+
+- **Identificador:** CU-08
+- **Nombre:** Autenticación de Usuario y Control de Acceso por Roles.
+- **Actores Principales:** Administrador, Docente, Estudiante.
+- **Precondiciones:** El usuario debe estar registrado activamente en la base de datos `users`.
+- **Disparador:** El usuario ingresa a `login.html`, introduce sus credenciales y hace clic en "Ingresar a la Plataforma".
+
+#### Flujo Principal:
+1. El usuario introduce su correo institucional y su contraseña.
+2. El cliente valida que los campos no estén vacíos y envía una petición `POST` a `/api/auth/login.php`.
+3. El backend busca el usuario por email y valida el hash con `password_verify()`.
+4. Si es correcto, el servidor regenera el ID de sesión, guarda los datos del perfil en `$_SESSION` y responde con `success: true` y el rol del usuario.
+5. El cliente procesa la respuesta y redirige al dashboard asignado:
+   - Administrador ➔ `/dashboard/admin/index.html`
+   - Docente ➔ `/dashboard/docente/index.html`
+   - Estudiante ➔ `/dashboard/estudiante/index.html`
+
+#### Flujos Alternativos:
+- **FA-08.1: Credenciales inválidas:** El sistema responde HTTP 401 con el mensaje *"Correo o contraseña incorrectos"*; el cliente muestra una alerta visual y no redirige.
+- **FA-08.2: Cuenta desactivada:** Si `activo = 0`, el sistema deniega el acceso informando que la cuenta ha sido suspendida.
+
+---
+
+### CU-09: Crear y Configurar Quizzes de Opción Múltiple (Panel Docente)
+
+- **Identificador:** CU-09
+- **Nombre:** Creación Dinámica de Actividades Evaluativas Tipo Quiz.
+- **Actor Principal:** Docente.
+- **Precondiciones:** Sesión activa con rol `docente`.
+- **Disparador:** El docente hace clic en "Nueva Actividad" en `dashboard/docente/actividades.html`.
+
+#### Flujo Principal:
+1. El docente selecciona el tipo de actividad: *"🎯 Quiz Interactivo (Auto-calificable)"*.
+2. El sistema despliega el contenedor del Constructor de Quizzes.
+3. El docente puede:
+   - Pulsar *"✨ Preguntas de Muestra (Lengua 9no)"* para cargar reactivos pedagógicos preconfigurados, o
+   - Pulsar *"➕ Añadir Pregunta"* para redactar un reactivo personalizado con 4 alternativas (A, B, C, D), marcando el círculo de la opción correcta y redactando una explicación pedagógica.
+4. El docente asigna la calificación máxima (ej. 10 pts) y la fecha límite de entrega.
+5. El docente guarda la actividad.
+6. El cliente empaqueta el payload JSON y realiza una petición `POST` a `/api/activities/create.php`.
+7. El servidor inserta la actividad en `activities`, las preguntas en `quiz_templates` y notifica a los estudiantes.
+
+---
+
+### CU-10: Organizar Actividades, Responder Quiz y Obtener Calificación Automática
+
+- **Identificador:** CU-10
+- **Nombre:** Resolución de Cuestionario Interactivo y Evaluación Inmediata.
+- **Actor Principal:** Estudiante.
+- **Precondiciones:** Estudiante autenticado y actividad de tipo `quiz` activa y no vencida.
+- **Disparador:** El estudiante pulsa *"🚀 Realizar Quiz Dinámico"* en `dashboard/estudiante/actividades.html`.
+
+#### Flujo Principal:
+1. El estudiante utiliza las pestañas de filtro (`⏳ Pendientes`) o el buscador para ubicar la actividad.
+2. El estudiante pulsa *"🚀 Realizar Quiz Dinámico"*.
+3. El sistema realiza una petición `GET` a `/api/activities/quiz.php?activity_id=X`, recuperando las preguntas de forma segura (sin las respuestas correctas).
+4. El modal `#quizPlayerModal` se despliega en pantalla completa mostrando la barra de progreso y la primera pregunta.
+5. El estudiante selecciona una opción para cada reactivo (A, B, C, D) y avanza mediante el botón *"Siguiente ▶"*.
+6. En la última pregunta, el estudiante pulsa *"🚀 Enviar y Calificar"*.
+7. El cliente envía las respuestas a `/api/activities/submit.php`.
+8. El servidor evalúa las respuestas contra la plantilla, calcula la nota proporcional a la nota máxima, registra la entrega con estado `calificada`, crea el registro en `grades` con retroalimentación automática y notifica a ambas partes.
+9. El cliente recibe la calificación y despliega la pantalla de celebración (🎉) mostrando la nota, el porcentaje de aciertos y el desglose de explicaciones pedagógicas pregunta por pregunta.
+
+---
+
+### CU-11: Gestionar Cuentas de Usuario y Emitir Comunicados Globales
+
+- **Identificador:** CU-11
+- **Nombre:** Administración de Usuarios y Comunicación Institucional.
+- **Actor Principal:** Administrador.
+- **Precondiciones:** Sesión activa con rol `admin`.
+- **Disparador:** El administrador accede al panel de usuarios o notificaciones.
+
+#### Flujo Principal:
+1. El administrador accede a `dashboard/admin/usuarios.html`.
+2. Puede registrar nuevos docentes o estudiantes, modificar nombres, actualizar correos o cambiar estados activo/inactivo.
+3. El sistema valida los datos y registra la operación en la tabla de auditoría `audit_logs`.
+4. El administrador accede a `dashboard/admin/notificaciones.html` y redacta un comunicado institucional.
+5. Selecciona el público objetivo (Todos, solo docentes o solo estudiantes).
+6. El backend genera registros masivos en la tabla `notifications`, haciéndolos visibles de forma instantánea en la campana de notificaciones de los destinatarios.
+

@@ -12,49 +12,47 @@ Representa los actores principales del ecosistema y sus interacciones con las ca
 flowchart LR
     %% Actores
     subgraph ACTORES["Actores del Sistema"]
+        ADM["👨‍💼 Administrador"]
+        DOC["👩‍🏫 Docente"]
         EST["👨‍🎓 Estudiante 9º EGB"]
-        DOC["👩‍🏫 Docente / Tutor"]
-        SYS["💻 Motor Frontend (Navegador)"]
+        SRV["🖥️ Backend PHP & MySQL"]
     end
 
     %% Casos de Uso
-    subgraph PLATAFORMA["Plataforma Educativa (Lengua y Literatura 9no)"]
-        CU01(["CU-01: Explorar Bloques Curriculares"])
-        CU01_1(["CU-01.1: Consultar Detalle Extendido de Módulo"])
-        CU02(["CU-02: Visualizar Lecciones Clave en Modales"])
-        CU03(["CU-03: Redactar Ensayo en Taller Argumentativo"])
-        CU03_1(["CU-03.1: Previsualizar Esquema en Tiempo Real"])
-        CU04(["CU-04: Resolver Cuestionario de Autoevaluación"])
-        CU04_1(["CU-04.1: Calcular Calificación sobre 10 pts"])
-        CU04_2(["CU-04.2: Recibir Diagnóstico y Retroalimentación"])
-        CU05(["CU-05: Entrenar Recursos Poéticos en Flashcards 3D"])
-        CU06(["CU-06: Conmutar y Persistir Tema de Interfaz (Claro/Oscuro)"])
-        CU07(["CU-07: Navegación Rápida con Desplazamiento Suave"])
+    subgraph PLATAFORMA["Plataforma Educativa Full-Stack"]
+        CU01(["CU-01: Explorar Unidades Curriculares y Fichas"])
+        CU02(["CU-02: Visualizar Lecciones Clave"])
+        CU03(["CU-03: Redactar Ensayo en Taller"])
+        CU04(["CU-04: Autoevaluación Diagnóstica Pública"])
+        CU05(["CU-05: Laboratorio 3D de Figuras Retóricas"])
+        CU06(["CU-06: Conmutar Modo Claro/Oscuro"])
+        CU08(["CU-08: Iniciar Sesión por Rol"])
+        CU09(["CU-09: Constructor de Quizzes Auto-Calificables"])
+        CU10(["CU-10: Quiz Player Interactivo y Auto-Calificación"])
+        CU11(["CU-11: Gestión de Usuarios y Comunicados"])
     end
+
+    %% Relaciones de Administrador
+    ADM --> CU08
+    ADM --> CU11
+
+    %% Relaciones de Docente
+    DOC --> CU08
+    DOC --> CU09
+    DOC --> CU01
 
     %% Relaciones de Estudiante
     EST --> CU01
-    EST --> CU02
-    EST --> CU03
-    EST --> CU04
     EST --> CU05
+    EST --> CU08
+    EST --> CU10
     EST --> CU06
-    EST --> CU07
 
-    %% Relaciones de Docente
-    DOC --> CU01
-    DOC --> CU02
-    DOC --> CU04
-
-    %% Inclusiones y Extensiones
-    CU01 -. "<<include>>" .-> CU01_1
-    CU03 -. "<<include>>" .-> CU03_1
-    CU04 -. "<<include>>" .-> CU04_1
-    CU04_1 -. "<<include>>" .-> CU04_2
-
-    %% Interacciones del Sistema
-    CU04_1 --> SYS
-    CU06 --> SYS
+    %% Procesamiento del Backend
+    CU08 --> SRV
+    CU09 --> SRV
+    CU10 --> SRV
+    CU11 --> SRV
 ```
 
 ---
@@ -429,3 +427,127 @@ componentDiagram
     JS *-- FC
     JS *-- TN
 ```
+
+---
+
+## 7. Diagrama Entidad-Relación (ER) de la Base de Datos
+
+Modela la persistencia relacional en MySQL de los usuarios, actividades, cuestionarios, entregas, calificaciones y notificaciones:
+
+```mermaid
+erDiagram
+    USERS ||--o{ ACTIVITIES : "crea (docente)"
+    USERS ||--o{ SUBMISSIONS : "entrega (estudiante)"
+    USERS ||--o{ GRADES : "evalua (docente)"
+    USERS ||--o{ NOTIFICATIONS : "recibe"
+    USERS ||--o{ AUDIT_LOGS : "genera"
+
+    ACTIVITIES ||--|| QUIZ_TEMPLATES : "define"
+    ACTIVITIES ||--o{ SUBMISSIONS : "recibe"
+
+    SUBMISSIONS ||--o| GRADES : "obtiene"
+
+    USERS {
+        int id PK
+        string nombre
+        string apellido
+        string email UK
+        string password
+        enum rol "admin, docente, estudiante"
+        boolean activo
+        timestamp created_at
+    }
+
+    ACTIVITIES {
+        int id PK
+        int docente_id FK
+        string titulo
+        text descripcion
+        enum tipo "archivo, quiz, mixta"
+        datetime fecha_inicio
+        datetime fecha_limite
+        decimal nota_maxima
+        boolean activa
+    }
+
+    QUIZ_TEMPLATES {
+        int id PK
+        int activity_id FK
+        json preguntas "Array de preguntas, opciones, respuesta y explicacion"
+    }
+
+    SUBMISSIONS {
+        int id PK
+        int activity_id FK
+        int estudiante_id FK
+        text respuesta_texto
+        string archivo_url
+        json quiz_respuestas "Respuestas marcadas"
+        decimal quiz_score
+        enum estado "entregada, calificada, retrasada"
+        timestamp fecha_entrega
+    }
+
+    GRADES {
+        int id PK
+        int submission_id FK
+        int docente_id FK
+        decimal nota
+        text retroalimentacion
+        timestamp fecha_calificacion
+    }
+
+    NOTIFICATIONS {
+        int id PK
+        int user_id FK
+        string tipo
+        string titulo
+        text mensaje
+        string url
+        boolean leida
+        timestamp created_at
+    }
+
+    AUDIT_LOGS {
+        int id PK
+        int user_id FK
+        string accion
+        string tabla_afectada
+        int registro_id
+        string ip
+        timestamp created_at
+    }
+```
+
+---
+
+## 8. Diagrama de Secuencia: Auto-Calificación de Quizzes
+
+Ilustra la interacción dinámica entre el estudiante, la interfaz interactiva, la API REST en PHP y la base de datos MySQL:
+
+```mermaid
+sequenceDiagram
+    autonumber
+    actor Estudiante
+    participant UI as Quiz Player Modal (JS)
+    participant API as submit.php (PHP 8)
+    participant DB as MySQL (lengua_literatura_9no)
+
+    Estudiante->>UI: Selecciona opciones A, B, C, D
+    Estudiante->>UI: Clic en "🚀 Enviar y Calificar"
+    UI->>API: POST /api/activities/submit.php {actividad_id, quiz_respuestas}
+    
+    API->>DB: SELECT preguntas FROM quiz_templates WHERE activity_id = ?
+    DB-->>API: Plantilla de preguntas y respuestas correctas
+
+    Note over API: Computa aciertos y calcula nota proporcional a nota_maxima
+    
+    API->>DB: INSERT INTO submissions (estado = 'calificada', quiz_score = ?)
+    API->>DB: INSERT INTO grades (nota = ?, retroalimentacion = 'Auto-calificación...')
+    API->>DB: INSERT INTO notifications (Estudiante + Docente)
+
+    API-->>UI: 201 Created {quiz_score, quiz_correct, quiz_feedback}
+
+    UI-->>Estudiante: Muestra vista festiva 🎉 con Nota, Porcentaje y Desglose didáctico
+```
+

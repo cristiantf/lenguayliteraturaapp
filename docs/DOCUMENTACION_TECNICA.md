@@ -1,289 +1,201 @@
 # ⚙️ Documentación Técnica del Sistema: Lengua y Literatura 9.º EGB
 
-Este documento constituye el manual de referencia técnica, desarrollo y mantenimiento de la plataforma interactiva de **Lengua y Literatura para 9.º Grado de Educación General Básica Superior** de la **Unidad Educativa Fiscomisional San Lorenzo**.
+Este documento constituye el manual de referencia técnica, desarrollo y mantenimiento de la plataforma interactiva y de gestión académica de **Lengua y Literatura para 9.º Grado de Educación General Básica Superior** de la **Unidad Educativa Fiscomisional San Lorenzo**.
 
 ---
 
 ## 1. Requerimientos del Sistema y Compatibilidad
 
-La plataforma ha sido desarrollada siguiendo los estándares web modernos del W3C (HTML5, CSS3, ECMAScript 2020+), lo que le permite ejecutarse de manera homogénea en cualquier navegador web moderno sin dependencias de plugins o software adicional.
+La plataforma ha sido desarrollada bajo una arquitectura **Full-Stack desacoplada**:
+- **Frontend:** HTML5 semántico, Vanilla CSS3 estructurado en tokens, JavaScript modular (ES6+) y Bootstrap 5.3.3.
+- **Backend:** PHP 8.0+ con arquitectura REST, codificación estricta en JSON, autenticación mediante sesiones de servidor seguras (cookies HttpOnly/SameSite) y PDO para MySQL.
+- **Base de Datos:** MySQL 5.7+ o MariaDB 10.3+ con soporte de tipos JSON nativos y llaves foráneas en cascada.
 
 ### Compatibilidad de Navegadores
 | Navegador | Versión Mínima Soportada | Estado de Compatibilidad |
 | :--- | :--- | :--- |
-| **Google Chrome / Chromium** | 90+ | Totalmente Compatible (Soporte CSS Grid, Flexbox, Custom Properties) |
+| **Google Chrome / Chromium** | 90+ | Totalmente Compatible (Soporte CSS Grid, Flexbox, Custom Properties, Fetch API) |
 | **Mozilla Firefox** | 88+ | Totalmente Compatible |
 | **Microsoft Edge** | 90+ | Totalmente Compatible |
 | **Apple Safari (macOS / iOS)** | 14.1+ | Totalmente Compatible |
 | **Opera** | 76+ | Totalmente Compatible |
-| **Navegadores Móviles (Android / iOS)** | Cualquier versión moderna | Optimizado con diseño responsivo táctil |
-
-### Requisitos de Hardware del Cliente
-- **Memoria RAM:** Mínimo 1 GB disponible en el dispositivo.
-- **Resolución de Pantalla:** Adaptable desde teléfonos móviles (360px de ancho) hasta monitores de escritorio Ultra HD (4K).
-- **Almacenamiento Local:** Requiere soporte de `localStorage` habilitado para persistir la preferencia de tema.
+| **Navegadores Móviles (Android / iOS)** | Cualquier versión moderna | Optimizado con diseño táctil y responsive |
 
 ---
 
 ## 2. Dependencias Externas y Recursos CDN
 
-El proyecto minimiza las dependencias externas a recursos estables y de alta disponibilidad mediante CDN (Content Delivery Network):
-
-### 1. Bootstrap 5.3.3
-- **CSS:** `https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css`
-  - *Integridad SHA-384:* `sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH`
-  - *Uso:* Utilidades de rejilla responsiva (Grid: `.row`, `.col-md-4`, etc.), espaciados rápidos y diseño base de tarjetas y modales.
-- **JavaScript Bundle:** `https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js`
-  - *Integridad SHA-384:* `sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz`
-  - *Uso:* Inicialización y control de accesibilidad de los modales de las tres lecciones formativas.
-
-### 2. Google Fonts
-- **URL de importación:** `https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Playfair+Display:ital,wght@0,600;0,800;1,600&display=swap`
-- **Tipografías:**
-  - `Outfit`: Familia tipográfica sans-serif contemporánea utilizada para cuerpos de texto, interfaces de usuario, botones y formularios.
-  - `Playfair Display`: Familia tipográfica con serifa de alta elegancia utilizada en títulos principales (`h1`, `h2`), encabezados y citas literarias.
+1. **Bootstrap 5.3.3**
+   - CSS: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css`
+   - JS Bundle: `https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js`
+   - *Uso:* Rejilla responsiva, componentes modales accesibles y utilidades de espaciado.
+2. **Google Fonts**
+   - Tipografías: `Outfit` (sans-serif para UI y textos de lectura) y `Playfair Display` (serif refinada para títulos principales y literatura).
 
 ---
 
-## 3. Especificación de Estructuras de Datos (`js/data/modulesData.js` y `js/data/quizData.js`)
+## 3. Catálogo y Especificación de la API REST (`/api/`)
 
-Los contenidos curriculares y las preguntas evaluativas están organizados en módulos JavaScript independientes en la carpeta `js/data/` que desacoplan la información de la lógica de renderizado.
+Todos los endpoints retornan respuestas en formato `application/json` con cabeceras CORS/credenciales configuradas en [`api/config/session.php`](../api/config/session.php).
 
-### 3.1 Diccionario de Módulos Curriculares (`MODULES_DATA`)
+### 3.1 Módulo de Autenticación (`/api/auth/`)
 
-Estructura tipo diccionario asociativo donde cada clave numérica representa un bloque curricular (del 1 al 5):
+| Endpoint | Método | Roles Permitidos | Parámetros (JSON) | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| `/api/auth/login.php` | `POST` | Público | `{ email, password }` | Verifica credenciales con `password_verify()`, regenera el session ID y almacena el perfil en `$_SESSION`. |
+| `/api/auth/check.php` | `GET` | Cualquiera | Ninguno | Retorna el estado de la sesión activa y los datos del usuario autenticado. |
+| `/api/auth/logout.php` | `POST` | Autenticado | Ninguno | Destruye la sesión en el servidor y limpia la cookie de sesión. |
 
-```typescript
-interface ModuleDetail {
-    title: string;       // Subtítulo del tema dentro del bloque
-    text: string;        // Explicación conceptual detallada
-}
+### 3.2 Módulo de Actividades y Quizzes (`/api/activities/`)
 
-interface ModuleItem {
-    title: string;             // Título formal del bloque curricular
-    badge: string;             // Etiqueta distintiva (ej. "Bloque 1")
-    description: string;       // Resumen pedagógico del bloque
-    topics: string[];          // Lista de temas o destrezas a desarrollar
-    details: ModuleDetail[];   // Desglose conceptual para el modal
-}
+| Endpoint | Método | Roles Permitidos | Parámetros | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| `/api/activities/list.php` | `GET` | Todos | Ninguno | **Admin:** Retorna todas las actividades del plantel.<br>**Docente:** Retorna las actividades creadas por el docente.<br>**Estudiante:** Retorna actividades activas con sus entregas y notas personales. |
+| `/api/activities/create.php` | `POST` | `docente`, `admin` | `{ titulo, tipo, descripcion, nota_maxima, fecha_limite, activa, preguntas? }` | Inserta la actividad y, si `tipo` es `quiz` o `mixta`, almacena las preguntas en `quiz_templates`. |
+| `/api/activities/quiz.php` | `GET` | Todos | `?activity_id=X` | Retorna las preguntas del quiz. **Seguridad:** Oculta las respuestas correctas a estudiantes que no hayan finalizado el examen. |
+| `/api/activities/submit.php` | `POST` | `estudiante` | `{ actividad_id, respuesta_texto?, quiz_respuestas?, archivo? }` | Registra la entrega. **Auto-calificación:** Si es quiz, evalúa las respuestas contra la plantilla, calcula la nota proporcional a `nota_maxima`, crea el registro en `grades` con retroalimentación inmediata y notifica a estudiante y docente. |
+| `/api/activities/update.php` | `POST` | `docente`, `admin` | `{ id, titulo, tipo, descripcion, nota_maxima, fecha_limite, activa, preguntas? }` | Actualiza la actividad y su plantilla de preguntas. |
+| `/api/activities/delete.php` | `POST` | `docente`, `admin` | `{ id }` | Elimina la actividad y sus registros dependientes en cascada. |
+| `/api/activities/toggle.php` | `POST` | `docente`, `admin` | `{ id, activa }` | Alterna el estado activo/pausado de la actividad. |
 
-type ModulesDataRecord = Record<number, ModuleItem>;
-```
+### 3.3 Módulo de Calificaciones (`/api/grades/`)
 
-#### Esquema del Objeto:
-```javascript
-const MODULES_DATA = {
-    1: {
-        title: "Lengua y Cultura: Origen de la Escritura y Variaciones Lingüísticas",
-        badge: "Bloque 1",
-        description: "Explora la evolución de los sistemas de escritura desde los sumerios...",
-        topics: [
-            "De la tradición oral a la alfabética (Mesopotamia, Egipto, Fenicia)",
-            "Variaciones lingüísticas diatópicas, diastráticas y diafásicas",
-            "La influencia de las tecnologías en la escritura contemporánea",
-            "Diversidad lingüística del Ecuador y preservación de lenguas ancestrales"
-        ],
-        details: [
-            {
-                title: "1. Evolución Histórica de la Escritura",
-                text: "La escritura cuneiforme sumeria (circa 3500 a.C.) y los jeroglíficos..."
-            },
-            {
-                title: "2. Sociolingüística y Registros de Habla",
-                text: "El idioma español se diversifica a través de dialectos geográficos..."
-            }
-        ]
-    },
-    // Bloques 2, 3, 4 y 5...
-};
+| Endpoint | Método | Roles Permitidos | Parámetros | Descripción |
+| :--- | :--- | :--- | :--- | :--- |
+| `/api/grades/list.php` | `GET` | `docente`, `admin` | `?actividad_id=X` | Lista las entregas de los estudiantes para una actividad dada, permitiendo consultar respuestas, archivos y notas. |
+| `/api/grades/student.php` | `GET` | `estudiante` | Ninguno | Retorna el consolidado de calificaciones y retroalimentaciones del estudiante logueado. |
+| `/api/grades/assign.php` | `POST` | `docente`, `admin` | `{ submission_id, nota, retroalimentacion }` | Registra o actualiza la nota manual de una entrega y notifica al estudiante. |
+
+### 3.4 Módulo de Notificaciones y Usuarios (`/api/notifications/`, `/api/users/`)
+
+- **`/api/notifications/list.php` (GET):** Retorna las notificaciones recientes del usuario ordenadas cronológicamente.
+- **`/api/notifications/read.php` (POST):** Marca una o todas las notificaciones como leídas.
+- **`/api/notifications/broadcast.php` (POST - Admin):** Emite comunicados masivos dirigidos a roles específicos o a todos los usuarios.
+- **`/api/users/list.php`, `create.php`, `update.php`, `delete.php` (Admin):** CRUD completo para la gestión de cuentas del plantel.
+
+---
+
+## 4. Esquema de Base de Datos Relacional (`sql/schema.sql`)
+
+La base de datos `lengua_literatura_9no` consta de 7 tablas normalizadas en Tercera Forma Normal (3NF):
+
+```sql
+-- 1. Usuarios del sistema
+CREATE TABLE users (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(100) NOT NULL,
+    apellido VARCHAR(100) NOT NULL,
+    email VARCHAR(150) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    rol ENUM('admin', 'docente', 'estudiante') NOT NULL,
+    activo BOOLEAN DEFAULT TRUE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 2. Actividades pedagógicas
+CREATE TABLE activities (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    docente_id INT NOT NULL,
+    titulo VARCHAR(200) NOT NULL,
+    descripcion TEXT NOT NULL,
+    tipo ENUM('archivo', 'quiz', 'mixta') DEFAULT 'archivo',
+    fecha_inicio DATETIME NOT NULL,
+    fecha_limite DATETIME NOT NULL,
+    nota_maxima DECIMAL(5,2) DEFAULT 10.00,
+    activa BOOLEAN DEFAULT TRUE,
+    FOREIGN KEY (docente_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 3. Plantillas de Quizzes de opción múltiple
+CREATE TABLE quiz_templates (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id INT NOT NULL,
+    preguntas JSON NOT NULL, -- Array de {question, options[4], answer, explanation}
+    FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE
+);
+
+-- 4. Entregas de estudiantes
+CREATE TABLE submissions (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    activity_id INT NOT NULL,
+    estudiante_id INT NOT NULL,
+    respuesta_texto TEXT,
+    archivo_url VARCHAR(255),
+    quiz_respuestas JSON, -- Diccionario {preguntaIndex: opcionElegida}
+    quiz_score DECIMAL(5,2),
+    estado ENUM('entregada', 'calificada', 'retrasada') DEFAULT 'entregada',
+    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (activity_id) REFERENCES activities(id) ON DELETE CASCADE,
+    FOREIGN KEY (estudiante_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 5. Calificaciones y Rúbricas
+CREATE TABLE grades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    submission_id INT NOT NULL UNIQUE,
+    docente_id INT NOT NULL,
+    nota DECIMAL(5,2) NOT NULL,
+    retroalimentacion TEXT,
+    fecha_calificacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (submission_id) REFERENCES submissions(id) ON DELETE CASCADE,
+    FOREIGN KEY (docente_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 6. Notificaciones en tiempo real
+CREATE TABLE notifications (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    titulo VARCHAR(150) NOT NULL,
+    mensaje TEXT NOT NULL,
+    url VARCHAR(255),
+    leida BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- 7. Registro de Auditoría
+CREATE TABLE audit_logs (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    accion VARCHAR(100) NOT NULL,
+    tabla_afectada VARCHAR(50),
+    registro_id INT,
+    ip VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 ```
 
 ---
 
-### 3.2 Banco de Preguntas Evaluativas (`QUIZ_QUESTIONS`)
+## 5. Módulos JavaScript de Gestión en el Cliente (`/js/modules/`)
 
-Estructura de reactivos formativos para el banco de pruebas:
-
-```typescript
-interface QuizQuestionItem {
-    question: string;       // Enunciado de la pregunta
-    options: string[];      // Lista de 4 opciones de respuesta
-    answer: number;         // Índice (0-based) de la opción correcta
-    explanation: string;    // Justificación pedagógica de la respuesta
-}
-```
-
----
-
-## 4. Manual de Referencia de Funciones JavaScript (`js/main.js`)
-
-A continuación se documentan las funciones que constituyen el núcleo de la aplicación:
-
-### 4.1 `initThemeToggle()`
-- **Propósito:** Gestiona la detección, alternancia y persistencia del tema visual (claro / oscuro).
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Comportamiento:**
-  1. Lee la clave `'theme'` en `localStorage`.
-  2. Si no existe, invoca `window.matchMedia('(prefers-color-scheme: dark)')`.
-  3. Establece el atributo `data-theme` en el elemento raíz `<html>`.
-  4. Escucha el evento `click` en `#theme-toggle` para alternar entre `'dark'` y `'light'`.
-
-### 4.2 `updateThemeIcon(theme: string)`
-- **Propósito:** Sincroniza el glifo del botón conmutador y su etiqueta de accesibilidad.
-- **Parámetros:** `theme` (`'dark'` o `'light'`).
-- **Retorno:** `void`.
-- **Efecto en el DOM:** Coloca `'☀️'` cuando el tema es oscuro y `'🌙'` cuando es claro, actualizando además el atributo `title`.
-
-### 4.3 `initModuleDetailsModal()`
-- **Propósito:** Registra los manejadores de eventos delegados para abrir y cerrar la ventana modal de módulos curriculares.
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Comportamiento:**
-  - Asocia eventos de clic a todos los botones con la clase `.js-open-module`.
-  - Extrae el atributo `data-module-id`.
-  - Invoca `renderModuleModalContent()` y activa la clase `.active` en `#module-modal`.
-  - Maneja el cierre ante clics en `#modal-close` o en el fondo atenuado del modal.
-
-### 4.4 `renderModuleModalContent(data: ModuleItem)`
-- **Propósito:** Genera el marcado HTML dinámico para la descripción, lista de temas y secciones detalladas del módulo seleccionado.
-- **Parámetros:** `data` (Objeto con la estructura de un módulo curricular).
-- **Retorno:** `void`.
-- **Efecto en el DOM:** Inyecta de forma segura el texto en `#modal-title`, `#modal-badge` y el árbol HTML estructurado en `#modal-body-content`.
-
-### 4.5 `initEssayBuilder()`
-- **Propósito:** Implementa un generador reactivo en tiempo real del esquema analítico del ensayo argumentativo.
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Elementos escuchados:**
-  - `#essay-topic` (Input de texto: Tema central).
-  - `#essay-thesis` (Input de texto: Tesis debatible).
-  - `#essay-arg` (Textarea: Argumento de respaldo o evidencia).
-- **Evento:** `input` (Permite actualizar el borrador inmediatamente mientras el estudiante escribe).
-
-### 4.6 `initFlashcards()`
-- **Propósito:** Concede interacción táctil y por clic a las tarjetas de figuras literarias.
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Efecto en el DOM:** Conmuta la clase CSS `.flipped` sobre el contenedor `.flashcard`, disparando la transformación CSS 3D correspondiente.
-
-### 4.7 `initAutoevaluacion()`
-- **Propósito:** Motor evaluativo principal que valida respuestas, calcula la calificación cuantitativa en base 10.0 y compone el diagnóstico cualitativo.
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Lógica de Calificación:**
-  $$\text{Calificación} = \left(\frac{\sum_{i=1}^{3} \text{valor}(q_i)}{3}\right) \times 10.0$$
-- **Validaciones:**
-  - Si falta contestar alguna pregunta, despliega un toast con estado de advertencia (`⚠️`).
-  - Si las tres preguntas fueron completadas, calcula la nota con 1 decimal y genera el desglose analítico.
-
-### 4.8 `showFloatingToast(contentHTML: string)` y `closeFloatingToast()`
-- **Propósito:** Servicio de notificaciones flotantes con soporte para retroalimentación pedagógica y alertas de validación.
-- **Parámetros:** `contentHTML` (Fragmento HTML que conforma el cuerpo del mensaje).
-- **Retorno:** `void`.
-- **Comportamiento:**
-  - `closeFloatingToast()` verifica si existe el elemento `#floating-feedback-toast` y lo remueve del DOM.
-  - `showFloatingToast()` crea un nuevo contenedor `div` con clase `.floating-feedback-toast` y lo anexa a `document.body`.
-
-### 4.9 `initSmoothScroll()`
-- **Propósito:** Provee un desplazamiento visualmente continuo al pulsar sobre los enlaces ancla de la plataforma.
-- **Parámetros:** Ninguno.
-- **Retorno:** `void`.
-- **Implementación:** Utiliza `element.scrollIntoView({ behavior: 'smooth', block: 'start' })`.
-
----
-
-## 5. Sistema de Tokens de Diseño CSS (`css/style.css`)
-
-El diseño de la aplicación está gobernado por variables CSS declaradas en `:root` para modo claro y sobreescritas en `[data-theme="dark"]` para modo oscuro:
-
-### 5.1 Tabla de Tokens de Color y Superficies
-| Variable CSS | Valor por Defecto (Modo Claro) | Valor Sobrescrito (Modo Oscuro) | Propósito de Uso |
-| :--- | :--- | :--- | :--- |
-| `--primary` | `#4f46e5` (Índigo 600) | `#4f46e5` | Color de marca primario, botones principales, enlaces activos |
-| `--primary-hover` | `#4338ca` | `#4338ca` | Estado de interacción hover para elementos primarios |
-| `--primary-light` | `rgba(79, 70, 229, 0.1)` | `rgba(79, 70, 229, 0.2)` | Fondos de insignias y elementos secundarios suaves |
-| `--secondary` | `#0d9488` (Verde Azulado 600) | `#0d9488` | Color secundario y acento de oratoria y éxito |
-| `--accent` | `#f59e0b` (Ámbar 500) | `#f59e0b` | Acento para recursos poéticos y ortografía |
-| `--accent-rose` | `#e11d48` (Rosa/Rojo 600) | `#e11d48` | Acento para alertas, redacción y textos expositivos |
-| `--accent-purple` | `#8b5cf6` (Púrpura 500) | `#8b5cf6` | Acento para literatura y estética lírica |
-| `--bg-body` | `#f8fafc` (Gris Pizarra Claro) | `#0b0f19` (Azul Oscuro Profundo) | Fondo general de la página |
-| `--bg-card` | `#ffffff` (Blanco Puro) | `#161e2e` (Pizarra Marino) | Superficies elevadas y tarjetas |
-| `--bg-card-hover`| `#f1f5f9` | `#1f293d` | Estado hover de tarjetas interactivas |
-| `--border-color` | `#e2e8f0` | `#26334d` | Líneas divisorias y contornos de tarjetas |
-| `--text-main` | `#0f172a` (Negro Pizarra) | `#f1f5f9` (Blanco Pizarra) | Tipografía principal de alta legibilidad |
-| `--text-muted` | `#64748b` | `#94a3b8` | Subtítulos, fechas e información secundaria |
-
-### 5.2 Tokens de Elevación, Efectos y Bordes
-```css
---shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.04);
---shadow-md: 0 8px 16px -4px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
---shadow-lg: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
---shadow-glow: 0 0 25px rgba(79, 70, 229, 0.25);
-
---glass-bg: rgba(255, 255, 255, 0.75); /* En dark: rgba(22, 30, 46, 0.85) */
---glass-border: rgba(255, 255, 255, 0.4);
---glass-blur: blur(12px);
-
---radius-sm: 8px;
---radius-md: 16px;
---radius-lg: 24px;
---radius-full: 9999px;
-```
+1. **`auth.js` (`Auth`):**
+   - Métodos: `login(email, password)`, `logout()`, `checkSession()`, `requireRole(roles)`.
+   - Controla la protección de rutas en el cliente redirigiendo automáticamente a `login.html` si no hay sesión válida o si el rol no coincide.
+2. **`activitiesManager.js` (`ActivitiesManager`):**
+   - Administra el panel docente: listado con paginación, filtros de estado, modal de creación/edición.
+   - **Quiz Builder:** Constructor interactivo de preguntas de opción múltiple, carga de preguntas modelo de 9no grado (`loadSampleQuestions()`), validaciones de integridad y empaquetado JSON.
+3. **`gradesManager.js` (`StudentManager`):**
+   - Administra el panel estudiantil: cálculo y renderizado de métricas en tiempo real (Total, Pendientes, Entregadas, Calificadas).
+   - Filtrado reactivo por pestañas y búsqueda instantánea por texto.
+   - **Quiz Player:** Reproductor inmersivo por pasos (`openQuizPlayer`, `selectQuizOption`, `submitQuiz`) con barra de progreso, pantalla festiva de celebración, cálculo de aciertos y desglose de retroalimentación pedagógica.
+4. **`usersManager.js` (`UsersManager`):**
+   - Administra el CRUD de usuarios en el panel de administración con paginación, filtros de rol y modales de confirmación.
+5. **`notifications.js` (`Notifications`):**
+   - Polling inteligente para actualización del contador en campana (🔔) y renderizado de la bandeja flotante de notificaciones.
 
 ---
 
 ## 6. Plan de Pruebas de Software (Testing Funcional)
 
-Para verificar el correcto funcionamiento de la plataforma en despliegues o actualizaciones, se aplica la siguiente matriz de pruebas de caja negra:
-
-| ID de Prueba | Caso de Prueba | Entrada / Acción | Resultado Esperado |
+| ID | Módulo / Escenario | Acción / Datos de Entrada | Resultado Esperado |
 | :--- | :--- | :--- | :--- |
-| **TC-01** | Conmutación de tema claro a oscuro | Clic en `#theme-toggle` | El atributo `data-theme` pasa a `'dark'`, el icono cambia a `☀️`, la clave en `localStorage` almacena `'dark'` y los colores se actualizan fluidamente. |
-| **TC-02** | Persistencia del tema | Recargar la página (F5) tras activar tema oscuro | La página se inicia directamente con `data-theme="dark"` sin parpadeos luminosos (*Flash of Unstyled Content*). |
-| **TC-03** | Apertura de modal de bloque | Clic en "Ver Detalle" del Bloque 3 (Lectura Crítica) | Se despliega `#module-modal` con título "Lectura: Textos de Divulgación Científica y Novela Policial" y sus 2 secciones detalladas. |
-| **TC-04** | Validación de cuestionario incompleto | Clic en "Calcular Calificación" habiendo respondido solo 1 pregunta | Se despliega un Toast flotante de advertencia: *"Preguntas Incompletas: Por favor responde las 3 preguntas antes de calcular tu calificación"*. |
-| **TC-05** | Calificación perfecta en cuestionario | Marcar respuestas correctas en q1, q2 y q3 y calcular | Se despliega Toast flotante con insignia "Calificación: 10.0 / 10 pts", icono 🎉 y las 3 preguntas marcadas con ✅. |
-| **TC-06** | Reactividad del Taller de Ensayo | Escribir en "Tema" y "Tesis" | El bloque `#essay-preview-output` se actualiza instantáneamente formateando el tema con 🎯 y la tesis con 💡. |
-| **TC-07** | Animación 3D de Flashcards | Clic en la tarjeta "Metáfora" | La tarjeta gira 180 grados sobre su eje Y revelando su concepto y el ejemplo *"Las perlas de tu boca"*. |
-
----
-
-## 7. Guía de Mantenimiento y Extensibilidad Modular
- 
-### A. Cómo agregar un nuevo Bloque Curricular
-1. Abre el archivo modular [`views/modulos.html`](file:///c:/Users/HP/Documents/Lengua-Literatura-9no/views/modulos.html).
-2. Dentro de `.modules-grid`, añade un nuevo elemento `<article class="module-card" data-module="6">...</article>` con su botón `<button class="btn btn-secondary js-open-module" data-module-id="6">Ver Detalle</button>`.
-3. Abre el archivo [`js/data/modulesData.js`](file:///c:/Users/HP/Documents/Lengua-Literatura-9no/js/data/modulesData.js) y dentro de `MODULES_DATA`, añade la clave `6`:
-   ```javascript
-   6: {
-       title: "Título del Nuevo Módulo",
-       badge: "Bloque 06",
-       description: "Descripción pedagógica...",
-       topics: ["Tema A", "Tema B"],
-       details: [
-           { title: "1. Subtema", text: "Texto detallado..." }
-       ]
-   }
-   ```
-4. Guarda los archivos. El nuevo bloque estará automáticamente integrado en la vista de módulos y el modal.
-
-### B. Cómo añadir una nueva Figura Literaria
-1. Abre [`views/figuras.html`](file:///c:/Users/HP/Documents/Lengua-Literatura-9no/views/figuras.html).
-2. En `.figures-grid`, inserta un nuevo bloque `.flashcard`:
-   ```html
-   <div class="flashcard">
-       <div class="flashcard-inner">
-           <div class="flashcard-front">
-               <span class="card-icon">⚡</span>
-               <h2>Anáfora</h2>
-               <p>Toca para voltear 🔄</p>
-           </div>
-           <div class="flashcard-back">
-               <strong>Repetición deliberada de una o más palabras al inicio de versos sucesivos.</strong>
-               <em>"Temprano levantó la muerte el vuelo, temprano madrugó la madrugada"</em>
-           </div>
-       </div>
-   </div>
-   ```
-3. Guarda el archivo. [`js/modules/flashcards.js`](file:///c:/Users/HP/Documents/Lengua-Literatura-9no/js/modules/flashcards.js) detecta dinámicamente cualquier nueva tarjeta en el DOM sin tocar scripts.
+| **TC-01** | Tema Claro / Oscuro | Clic en `#theme-toggle` | Cambia clase `data-theme`, persiste en `localStorage` y actualiza iconos fluidamente. |
+| **TC-02** | Login con credenciales válidas | `docente@demo.com` / `docente123` | Autenticación 200 OK, inicia sesión en PHP y redirige a `dashboard/docente/index.html`. |
+| **TC-03** | Protección de Rutas | Acceso directo a `dashboard/admin/index.html` sin autenticar | `Auth.requireRole()` intercepta la navegación y redirige a `login.html`. |
+| **TC-04** | Constructor de Quizzes (Docente) | Nueva actividad tipo `quiz`, clic en "Preguntas de Muestra" | Se pre-cargan 4 preguntas de 9no grado con sus opciones, respuesta correcta y explicación. Guarda en `activities` y `quiz_templates`. |
+| **TC-05** | Seguridad en Quizzes | Consulta GET a `api/activities/quiz.php` por un estudiante | Las preguntas se retornan con las opciones pero **sin** los campos `answer` ni `explanation`. |
+| **TC-06** | Resolución y Auto-Calificación de Quiz | Estudiante responde 4 preguntas del Quiz y pulsa "Enviar" | `submit.php` evalúa aciertos, crea submission `calificada`, inserta nota en `grades`, muestra pantalla de celebración (🎉) y desglose pedagógico. |
+| **TC-07** | Organización del Panel Estudiante | Clic en pestaña "⏳ Pendientes" o escribir en el buscador | La lista se filtra reactivamente mostrando solo las actividades aplicables sin recargar la página. |
+| **TC-08** | Notificaciones en Tiempo Real | Al auto-calificar un quiz | Se crea notificación instantánea para el estudiante con su nota y para el docente informándole la entrega. |
