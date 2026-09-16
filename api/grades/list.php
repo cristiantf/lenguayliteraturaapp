@@ -32,6 +32,7 @@ $query = "
         u.apellido AS estudiante_apellido,
         u.email AS estudiante_email,
         a.titulo AS actividad_titulo,
+        a.tipo AS actividad_tipo,
         a.nota_maxima
     FROM submissions s
     INNER JOIN users u ON u.id = s.estudiante_id
